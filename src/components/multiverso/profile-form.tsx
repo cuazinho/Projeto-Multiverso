@@ -18,46 +18,87 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Camera, Send, Sparkles } from "lucide-react"
+import { Camera, Send, Sparkles, Loader2 } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
+import { useFirestore, useUser, useAuth } from "@/firebase"
+import { doc, serverTimestamp } from "firebase/firestore"
+import { setDocumentNonBlocking } from "@/firebase/non-blocking-updates"
+import { initiateAnonymousSignIn } from "@/firebase/non-blocking-login"
 
 const profileSchema = z.object({
   name: z.string().min(2, "Nome é obrigatório"),
-  idName: z.string().min(2, "ID é obrigatório").regex(/^[a-zA-Z0-9_]+$/, "ID deve conter apenas letras, números e sublinhados"),
+  identificationName: z.string().min(2, "ID é obrigatório").regex(/^[a-zA-Z0-9_]+$/, "ID deve conter apenas letras, números e sublinhados"),
   purpose: z.string().min(10, "Conte-nos mais sobre seu propósito"),
-  universe: z.string().min(2, "De qual universo você vem?"),
-  profileImage: z.string().optional(),
+  universeName: z.string().min(2, "Qual universo você quer criar?"),
+  profileImageUrl: z.string().optional(),
 })
 
 type ProfileFormValues = z.infer<typeof profileSchema>
 
-interface ProfileFormProps {
-  onAddExplorer: (explorer: ProfileFormValues) => void;
-}
-
-export function ProfileForm({ onAddExplorer }: ProfileFormProps) {
+export function ProfileForm() {
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { firestore } = useFirestore() ? { firestore: useFirestore() } : { firestore: null };
+  const { auth } = useAuth() ? { auth: useAuth() } : { auth: null };
+  const { user } = useUser();
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       name: "",
-      idName: "",
+      identificationName: "",
       purpose: "",
-      universe: "",
-      profileImage: "",
+      universeName: "",
+      profileImageUrl: "",
     },
   })
 
-  const onSubmit = (data: ProfileFormValues) => {
-    const finalData = { ...data, profileImage: imagePreview || `https://picsum.photos/seed/${data.idName}/200/200` }
-    onAddExplorer(finalData)
-    toast({
-      title: "Inscrição Realizada!",
-      description: "Bem-vindo ao multiverso, explorador.",
-    })
-    form.reset()
-    setImagePreview(null)
+  const onSubmit = async (data: ProfileFormValues) => {
+    if (!firestore || !auth) return;
+    
+    setIsSubmitting(true)
+
+    // Ensure user is signed in before saving
+    let currentUser = user;
+    if (!currentUser) {
+      initiateAnonymousSignIn(auth);
+      toast({
+        title: "Autenticando...",
+        description: "Preparando seu acesso ao multiverso.",
+      })
+      setIsSubmitting(false)
+      return;
+    }
+
+    const docId = currentUser.uid;
+    const finalData = { 
+      ...data, 
+      id: docId,
+      profileImageUrl: imagePreview || `https://picsum.photos/seed/${data.identificationName}/200/200`,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    }
+
+    const docRef = doc(firestore, "explorer_profiles", docId);
+    
+    try {
+      setDocumentNonBlocking(docRef, finalData, { merge: true });
+      
+      toast({
+        title: "Manifestação Concluída!",
+        description: "Seu universo e perfil foram registrados com sucesso.",
+      })
+      form.reset()
+      setImagePreview(null)
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro Dimensional",
+        description: "Não foi possível registrar seu perfil agora.",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -79,9 +120,9 @@ export function ProfileForm({ onAddExplorer }: ProfileFormProps) {
             <Sparkles className="h-8 w-8 text-primary" />
           </div>
         </div>
-        <CardTitle className="text-3xl font-headline font-bold">Sua Ficha de Explorador</CardTitle>
+        <CardTitle className="text-3xl font-headline font-bold">Ficha de Criador Real</CardTitle>
         <CardDescription>
-          Preencha seus dados para ser catalogado no grande multiverso.
+          Apenas exploradores autênticos podem manifestar realidades no Projeto Multiverso.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -100,7 +141,7 @@ export function ProfileForm({ onAddExplorer }: ProfileFormProps) {
                   <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
                 </label>
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">Clique para definir sua imagem de perfil</p>
+              <p className="mt-2 text-xs text-muted-foreground">Sua identidade visual no multiverso</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -119,14 +160,14 @@ export function ProfileForm({ onAddExplorer }: ProfileFormProps) {
               />
               <FormField
                 control={form.control}
-                name="idName"
+                name="identificationName"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Nome de Identificação</FormLabel>
                     <FormControl>
                       <Input placeholder="seu_id_unico" {...field} />
                     </FormControl>
-                    <FormDescription>Seu @ no multiverso</FormDescription>
+                    <FormDescription>Seu @ universal</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -135,13 +176,14 @@ export function ProfileForm({ onAddExplorer }: ProfileFormProps) {
 
             <FormField
               control={form.control}
-              name="universe"
+              name="universeName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nome do Universo de Origem</FormLabel>
+                  <FormLabel>Nome do Universo que deseja criar</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ex: Terra-616, Dimensão C-137" {...field} />
+                    <Input placeholder="Ex: Nova Terra, Dimensão Alpha-X" {...field} />
                   </FormControl>
+                  <FormDescription>O nome da realidade que você vai arquitetar</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -152,10 +194,10 @@ export function ProfileForm({ onAddExplorer }: ProfileFormProps) {
               name="purpose"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Qual seu Propósito?</FormLabel>
+                  <FormLabel>Qual seu Propósito Criativo?</FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="Descreva o que te motiva a explorar o multiverso..." 
+                      placeholder="Descreva o que te motiva a dar vida a este novo universo..." 
                       className="min-h-[100px]"
                       {...field} 
                     />
@@ -165,8 +207,20 @@ export function ProfileForm({ onAddExplorer }: ProfileFormProps) {
               )}
             />
 
-            <Button type="submit" className="w-full bg-primary hover:bg-accent text-lg font-headline h-12">
-              <Send className="mr-2 h-5 w-5" /> Inscrever no Projeto Multiverso
+            <Button 
+              type="submit" 
+              className="w-full bg-primary hover:bg-accent text-lg font-headline h-12"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Manifestando...
+                </>
+              ) : (
+                <>
+                  <Send className="mr-2 h-5 w-5" /> Registrar como Criador Real
+                </>
+              )}
             </Button>
           </form>
         </Form>

@@ -1,56 +1,32 @@
 "use client"
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Navbar } from "@/components/multiverso/navbar";
 import { ProfileForm } from "@/components/multiverso/profile-form";
 import { ExplorerCard } from "@/components/multiverso/explorer-card";
 import { Button } from "@/components/ui/button";
-import { Globe, Users, ArrowDown, Sparkles } from "lucide-react";
-
-interface Explorer {
-  name: string;
-  idName: string;
-  purpose: string;
-  universe: string;
-  profileImage?: string;
-}
-
-const MOCK_EXPLORERS: Explorer[] = [
-  {
-    name: "Arthur Dent",
-    idName: "tea_lover",
-    purpose: "Simplesmente sobreviver à demolição da Terra e encontrar uma boa xícara de chá.",
-    universe: "Via Láctea (Setor ZZ9 Plural Z Alpha)",
-    profileImage: "https://picsum.photos/seed/arthur/200/200"
-  },
-  {
-    name: "Rick Sanchez",
-    idName: "wubbalubba",
-    purpose: "A busca infinita por inteligência e diversão amoral através das dimensões.",
-    universe: "Dimensão C-137",
-    profileImage: "https://picsum.photos/seed/rick/200/200"
-  },
-  {
-    name: "Peter Parker",
-    idName: "friendly_neighborhood",
-    purpose: "Proteger os inocentes enquanto tenta equilibrar a vida de um estudante comum.",
-    universe: "Terra-616",
-    profileImage: "https://picsum.photos/seed/spidey/200/200"
-  }
-];
+import { Globe, Users, ArrowDown, Sparkles, Loader2 } from "lucide-react";
+import { useCollection, useMemoFirebase, useFirestore, useAuth, useUser } from "@/firebase";
+import { collection, query, orderBy } from "firebase/firestore";
+import { initiateAnonymousSignIn } from "@/firebase/non-blocking-login";
 
 export default function Home() {
-  const [explorers, setExplorers] = useState<Explorer[]>([]);
+  const { firestore, auth } = useFirestore() ? { firestore: useFirestore(), auth: useAuth() } : { firestore: null, auth: null };
+  const { user, isUserLoading } = useUser();
 
+  // Auto sign-in to ensure "true" explorers only
   useEffect(() => {
-    // In a real app, this would come from a database. 
-    // We'll initialize with some mock data.
-    setExplorers(MOCK_EXPLORERS);
-  }, []);
+    if (!isUserLoading && !user && auth) {
+      initiateAnonymousSignIn(auth);
+    }
+  }, [user, isUserLoading, auth]);
 
-  const addExplorer = (newExplorer: Explorer) => {
-    setExplorers((prev) => [newExplorer, ...prev]);
-  };
+  const explorersQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, "explorer_profiles"), orderBy("createdAt", "desc"));
+  }, [firestore]);
+
+  const { data: explorers, isLoading: isListLoading } = useCollection(explorersQuery);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -79,11 +55,11 @@ export default function Home() {
             </h1>
             <p className="max-w-2xl mx-auto text-lg md:text-xl text-primary-foreground/80 font-light italic">
               "Existem infinitos mundos, infinitas versões de você. <br /> 
-              Aqui, todas as identidades se encontram."
+              Aqui, as realidades que você imagina tornam-se reais."
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
               <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground font-bold rounded-full px-8 h-14" asChild>
-                <a href="#join">Criar Minha Ficha</a>
+                <a href="#join">Criar Meu Universo</a>
               </Button>
               <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-primary font-bold rounded-full px-8 h-14" asChild>
                 <a href="#explorers">Ver Exploradores</a>
@@ -100,16 +76,16 @@ export default function Home() {
           <div className="container mx-auto px-4">
             <div className="grid lg:grid-cols-2 gap-16 items-center">
               <div className="space-y-6">
-                <h2 className="text-4xl font-headline font-bold text-primary">Deixe sua Marca no Infinito</h2>
+                <h2 className="text-4xl font-headline font-bold text-primary">Dê Vida ao Seu Universo</h2>
                 <p className="text-lg text-muted-foreground leading-relaxed">
-                  Ao se inscrever no Projeto Multiverso, você não apenas registra sua presença, mas abre portas para conexões interdimensionais. Defina seu propósito, identifique seu universo e mostre quem você realmente é através das realidades.
+                  Ao se inscrever no Projeto Multiverso, você assume o papel de Criador. Defina o propósito da sua existência, identifique o novo universo que você deseja manifestar e conecte-se com outros arquitetos da realidade.
                 </p>
                 <ul className="space-y-4">
                   {[
-                    "Registro universal único",
-                    "Compartilhamento de propósitos",
-                    "Mapa de universos conhecidos",
-                    "Identidade visual personalizada"
+                    "Criação de universos únicos",
+                    "Manifestação de propósitos",
+                    "Rede de arquitetos dimensionais",
+                    "Identidade visual universal"
                   ].map((item, i) => (
                     <li key={i} className="flex items-center gap-3">
                       <div className="bg-accent/10 p-1 rounded-full">
@@ -121,7 +97,7 @@ export default function Home() {
                 </ul>
               </div>
               <div>
-                <ProfileForm onAddExplorer={addExplorer} />
+                <ProfileForm />
               </div>
             </div>
           </div>
@@ -132,24 +108,31 @@ export default function Home() {
           <div className="container mx-auto px-4">
             <div className="text-center mb-16 space-y-4">
               <div className="flex justify-center items-center gap-2 text-primary font-bold uppercase tracking-tighter text-sm">
-                <Users className="h-5 w-5" /> Catalogação Ativa
+                <Users className="h-5 w-5" /> Catalogação Real
               </div>
-              <h2 className="text-4xl font-headline font-bold">Diretório de Exploradores</h2>
+              <h2 className="text-4xl font-headline font-bold">Diretório de Criadores</h2>
               <p className="text-muted-foreground max-w-xl mx-auto">
-                Todos que cruzaram o portal e registraram sua jornada. Conheça seus vizinhos de outras dimensões.
+                Apenas exploradores autênticos que registraram seus planos de criação universal.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {explorers.map((explorer, index) => (
-                <ExplorerCard key={`${explorer.idName}-${index}`} explorer={explorer} />
-              ))}
-            </div>
+            {isListLoading ? (
+              <div className="flex flex-col items-center justify-center py-20 gap-4">
+                <Loader2 className="h-12 w-12 text-primary animate-spin" />
+                <p className="text-muted-foreground animate-pulse">Sintonizando frequências multiversais...</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                {explorers?.map((explorer) => (
+                  <ExplorerCard key={explorer.id} explorer={explorer} />
+                ))}
+              </div>
+            )}
 
-            {explorers.length === 0 && (
+            {!isListLoading && (!explorers || explorers.length === 0) && (
               <div className="text-center py-20 bg-card rounded-2xl border-2 border-dashed border-primary/20">
                 <Globe className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-20" />
-                <p className="text-muted-foreground">Nenhum explorador catalogado ainda. Seja o primeiro!</p>
+                <p className="text-muted-foreground">Nenhum criador autêntico catalogado nesta linha temporal. Comece a sua jornada acima!</p>
               </div>
             )}
           </div>
@@ -167,11 +150,11 @@ export default function Home() {
             </div>
             
             <p className="text-sm text-primary-foreground/60 text-center">
-              © {new Date().getFullYear()} Projeto Multiverso. Todos os direitos reservados através de todas as dimensões.
+              © {new Date().getFullYear()} Projeto Multiverso. Apenas dados reais protegidos por segurança dimensional.
             </p>
 
             <div className="flex gap-4">
-              <span className="text-xs font-mono bg-accent/20 px-3 py-1 rounded-full text-accent-foreground">Versão: Omega-01</span>
+              <span className="text-xs font-mono bg-accent/20 px-3 py-1 rounded-full text-accent-foreground">Status: Conectado</span>
             </div>
           </div>
         </div>
