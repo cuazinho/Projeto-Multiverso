@@ -7,7 +7,7 @@ import { ProfileForm } from "@/components/multiverso/profile-form";
 import { ExplorerCard } from "@/components/multiverso/explorer-card";
 import { Logo } from "@/components/multiverso/logo";
 import { Button } from "@/components/ui/button";
-import { Users, ArrowDown, Sparkles, Loader2, Globe, ShieldCheck } from "lucide-react";
+import { Users, ArrowDown, Sparkles, Globe, ShieldCheck, MessageCircle } from "lucide-react";
 import { useCollection, useMemoFirebase, useFirestore, useAuth, useUser } from "@/firebase";
 import { collection, query, orderBy } from "firebase/firestore";
 import { initiateAnonymousSignIn } from "@/firebase/non-blocking-login";
@@ -40,13 +40,13 @@ export default function Home() {
       <Navbar />
       
       <main className="flex-1">
-        {/* Hero Section - Neutral Grey/White theme */}
+        {/* Hero Section - Neutral theme */}
         <section className="relative h-[85vh] flex items-center justify-center overflow-hidden bg-slate-50">
           <div className="absolute inset-0 z-0">
             <img 
               src="https://picsum.photos/seed/multiverse-neutral/1920/1080" 
               alt="Multiverso" 
-              className="w-full h-full object-cover grayscale opacity-20"
+              className="w-full h-full object-cover grayscale opacity-10"
               data-ai-hint="minimalist space"
             />
             <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-white/80 to-background" />
@@ -72,7 +72,9 @@ export default function Home() {
                 <a href="#join">Manifestar Universo</a>
               </Button>
               <Button size="lg" variant="outline" className="border-primary/20 text-primary hover:bg-primary/5 font-bold rounded-full px-10 h-16 transition-all" asChild>
-                <a href="#explorers">Diretório Real</a>
+                <a href="https://discord.gg/9znvQram" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                  <MessageCircle className="h-5 w-5" /> Comunidade Discord
+                </a>
               </Button>
             </div>
             
@@ -163,9 +165,16 @@ export default function Home() {
       <footer className="bg-white py-16 border-t border-border">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-12">
-            <Link href="/" className="hover:opacity-70 transition-opacity">
-              <Logo className="text-primary scale-110" />
-            </Link>
+            <div className="space-y-6 flex flex-col items-center md:items-start">
+              <Link href="/" className="hover:opacity-70 transition-opacity">
+                <Logo className="text-primary scale-110" />
+              </Link>
+              <div className="flex gap-6">
+                <a href="https://discord.gg/9znvQram" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-[#5865F2] transition-colors flex items-center gap-2 text-sm font-bold uppercase tracking-widest">
+                  <MessageCircle className="h-4 w-4" /> Discord do Projeto
+                </a>
+              </div>
+            </div>
             
             <div className="flex flex-col items-center md:items-end gap-4 text-center md:text-right">
               <p className="text-sm font-medium text-muted-foreground">
