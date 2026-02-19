@@ -7,10 +7,11 @@ import { ProfileForm } from "@/components/multiverso/profile-form";
 import { ExplorerCard } from "@/components/multiverso/explorer-card";
 import { Logo } from "@/components/multiverso/logo";
 import { Button } from "@/components/ui/button";
-import { Users, ArrowDown, Sparkles, Globe, ShieldCheck, MessageCircle } from "lucide-react";
-import { useCollection, useMemoFirebase, useFirestore, useAuth, useUser } from "@/firebase";
-import { collection, query, orderBy } from "firebase/firestore";
+import { Users, ArrowDown, Sparkles, Globe, ShieldCheck, MessageCircle, Trash2 } from "lucide-react";
+import { useCollection, useMemoFirebase, useFirestore, useAuth, useUser, deleteDocumentNonBlocking } from "@/firebase";
+import { collection, query, orderBy, doc } from "firebase/firestore";
 import { initiateAnonymousSignIn } from "@/firebase/non-blocking-login";
+import { toast } from "@/hooks/use-toast";
 
 export default function Home() {
   const { firestore, auth } = useFirestore() ? { firestore: useFirestore(), auth: useAuth() } : { firestore: null, auth: null };
@@ -21,7 +22,6 @@ export default function Home() {
     setCurrentYear(new Date().getFullYear());
   }, []);
 
-  // Auto sign-in to ensure "true" explorers only
   useEffect(() => {
     if (!isUserLoading && !user && auth) {
       initiateAnonymousSignIn(auth);
@@ -35,12 +35,30 @@ export default function Home() {
 
   const { data: explorers, isLoading: isListLoading } = useCollection(explorersQuery);
 
+  const handleClearAll = async () => {
+    if (!firestore || !explorers || explorers.length === 0) return;
+    
+    if (!confirm("⚠️ ATENÇÃO: Você deseja apagar TODOS os exploradores desta linha temporal? Esta ação é irreversível.")) {
+      return;
+    }
+
+    explorers.forEach((explorer) => {
+      const docRef = doc(firestore, "explorer_profiles", explorer.id);
+      deleteDocumentNonBlocking(docRef);
+    });
+
+    toast({
+      title: "Protocolo de Limpeza Iniciado",
+      description: "Todos os registros estão sendo removidos da base de dados.",
+    });
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
       
       <main className="flex-1">
-        {/* Hero Section - Neutral theme */}
+        {/* Hero Section */}
         <section className="relative h-[85vh] flex items-center justify-center overflow-hidden bg-slate-50">
           <div className="absolute inset-0 z-0">
             <img 
@@ -156,6 +174,19 @@ export default function Home() {
                 <Globe className="h-16 w-16 text-primary/20 mx-auto mb-6" />
                 <p className="text-xl text-muted-foreground font-medium">Nenhum criador catalogado nesta linha temporal.</p>
                 <p className="text-sm text-muted-foreground/60 mt-2">Seja o primeiro a manifestar seu universo.</p>
+              </div>
+            )}
+            
+            {!isListLoading && explorers && explorers.length > 0 && (
+              <div className="mt-20 flex justify-center">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleClearAll}
+                  className="text-muted-foreground hover:text-destructive flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] opacity-30 hover:opacity-100 transition-all"
+                >
+                  <Trash2 className="h-3 w-3" /> Reiniciar Protótipo (Limpar Tudo)
+                </Button>
               </div>
             )}
           </div>
