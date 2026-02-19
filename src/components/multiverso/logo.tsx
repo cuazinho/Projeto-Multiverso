@@ -11,30 +11,42 @@ export function Logo({ className, iconOnly = false }: LogoProps) {
       <svg
         width="45"
         height="45"
-        viewBox="0 0 100 100"
+        viewBox="0 0 400 400"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         className="shrink-0"
       >
-        {/* Outer Circle Ring */}
-        <circle cx="50" cy="50" r="46" stroke="currentColor" strokeWidth="2.5" opacity="0.8" />
-        
-        {/* Stylized 'P' with swirl */}
+        {/* Outer Swirl Ring */}
         <path
-          d="M38 30V72 M38 32C65 32 65 52 38 52 C28 52 22 60 28 72C35 84 65 84 78 62"
+          d="M192 42C108.6 42 41 109.6 41 193C41 276.4 108.6 344 192 344C244 344 289.4 317.8 316.5 278M192 42C275.4 42 343 109.6 343 193C343 276.4 275.4 344 192 344"
           stroke="currentColor"
-          strokeWidth="7"
+          strokeWidth="24"
+          strokeLinecap="round"
+          opacity="0.9"
+        />
+        
+        {/* The Stylized 'P' with fluid curves based on user image */}
+        <path
+          d="M178 95V340M178 100C230 100 280 120 280 185C280 250 230 270 178 270 M340 160C340 250 250 340 150 340"
+          stroke="currentColor"
+          strokeWidth="32"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
         
-        {/* Accent dot or swirl end */}
-        <circle cx="78" cy="62" r="3" fill="currentColor" />
+        {/* Tapered swirl end from the image */}
+        <path
+          d="M280 185C280 230 240 280 178 310"
+          stroke="currentColor"
+          strokeWidth="12"
+          strokeLinecap="round"
+          opacity="0.6"
+        />
       </svg>
       {!iconOnly && (
         <div className="flex flex-col leading-tight">
-          <span className="font-headline font-bold text-xl tracking-tight">Projeto</span>
-          <span className="font-headline font-bold text-xl tracking-tight -mt-1 opacity-90">Multiverso</span>
+          <span className="font-headline font-bold text-xl tracking-tight uppercase">Projeto</span>
+          <span className="font-headline font-bold text-xl tracking-tight -mt-1 opacity-80 uppercase">Multiverso</span>
         </div>
       )}
     </div>

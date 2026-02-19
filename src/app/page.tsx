@@ -7,7 +7,7 @@ import { ProfileForm } from "@/components/multiverso/profile-form";
 import { ExplorerCard } from "@/components/multiverso/explorer-card";
 import { Logo } from "@/components/multiverso/logo";
 import { Button } from "@/components/ui/button";
-import { Users, ArrowDown, Sparkles, Loader2, Globe } from "lucide-react";
+import { Users, ArrowDown, Sparkles, Loader2, Globe, ShieldCheck } from "lucide-react";
 import { useCollection, useMemoFirebase, useFirestore, useAuth, useUser } from "@/firebase";
 import { collection, query, orderBy } from "firebase/firestore";
 import { initiateAnonymousSignIn } from "@/firebase/non-blocking-login";
@@ -36,100 +36,113 @@ export default function Home() {
   const { data: explorers, isLoading: isListLoading } = useCollection(explorersQuery);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
       
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="relative h-[80vh] flex items-center justify-center overflow-hidden bg-primary">
+        {/* Hero Section - Neutral Grey/White theme */}
+        <section className="relative h-[85vh] flex items-center justify-center overflow-hidden bg-slate-50">
           <div className="absolute inset-0 z-0">
             <img 
-              src="https://picsum.photos/seed/multiverse-bg/1920/1080" 
+              src="https://picsum.photos/seed/multiverse-neutral/1920/1080" 
               alt="Multiverso" 
-              className="w-full h-full object-cover opacity-30 mix-blend-overlay"
-              data-ai-hint="space galaxy"
+              className="w-full h-full object-cover grayscale opacity-20"
+              data-ai-hint="minimalist space"
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/50 via-transparent to-background" />
+            <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-white/80 to-background" />
           </div>
           
-          <div className="container mx-auto px-4 z-10 text-center text-white space-y-6">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/20 backdrop-blur-sm border border-accent/30 rounded-full text-accent-foreground animate-bounce">
-              <Sparkles className="h-4 w-4" />
-              <span className="text-sm font-bold uppercase tracking-widest">Inscrições Abertas</span>
+          <div className="container mx-auto px-4 z-10 text-center space-y-8">
+            <div className="inline-flex items-center gap-2 px-6 py-2 bg-primary/5 backdrop-blur-sm border border-primary/10 rounded-full text-primary animate-fade-in">
+              <ShieldCheck className="h-4 w-4" />
+              <span className="text-xs font-bold uppercase tracking-[0.2em]">Acesso Autenticado</span>
             </div>
-            <h1 className="text-5xl md:text-8xl font-headline font-bold leading-tight">
-              PROJETO <br /> <span className="text-accent">MULTIVERSO</span>
+            
+            <h1 className="text-6xl md:text-9xl font-headline font-bold leading-none tracking-tighter text-primary">
+              PROJETO <br /> <span className="text-accent opacity-60">MULTIVERSO</span>
             </h1>
-            <p className="max-w-2xl mx-auto text-lg md:text-xl text-primary-foreground/80 font-light italic">
+            
+            <p className="max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground font-light leading-relaxed">
               "Existem infinitos mundos, infinitas versões de você. <br /> 
-              Aqui, as realidades que você imagina tornam-se reais."
+              Manifeste a realidade que você deseja criar."
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
-              <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground font-bold rounded-full px-8 h-14" asChild>
-                <a href="#join">Criar Meu Universo</a>
+            
+            <div className="flex flex-col sm:flex-row gap-6 justify-center pt-8">
+              <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-full px-10 h-16 shadow-2xl transition-all hover:scale-105" asChild>
+                <a href="#join">Manifestar Universo</a>
               </Button>
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-primary font-bold rounded-full px-8 h-14" asChild>
-                <a href="#explorers">Ver Exploradores</a>
+              <Button size="lg" variant="outline" className="border-primary/20 text-primary hover:bg-primary/5 font-bold rounded-full px-10 h-16 transition-all" asChild>
+                <a href="#explorers">Diretório Real</a>
               </Button>
             </div>
-            <div className="pt-12 animate-pulse">
-              <ArrowDown className="mx-auto h-8 w-8 opacity-50" />
+            
+            <div className="pt-16 animate-bounce opacity-30">
+              <ArrowDown className="mx-auto h-6 w-6" />
             </div>
           </div>
         </section>
 
         {/* Join Section */}
-        <section id="join" className="py-24 bg-background">
+        <section id="join" className="py-32 bg-white">
           <div className="container mx-auto px-4">
-            <div className="grid lg:grid-cols-2 gap-16 items-center">
-              <div className="space-y-6">
-                <h2 className="text-4xl font-headline font-bold text-primary">Dê Vida ao Seu Universo</h2>
-                <p className="text-lg text-muted-foreground leading-relaxed">
-                  Ao se inscrever no Projeto Multiverso, você assume o papel de Criador. Defina o propósito da sua existência, identifique o novo universo que você deseja manifestar e conecte-se com outros arquitetos da realidade.
+            <div className="grid lg:grid-cols-2 gap-24 items-center">
+              <div className="space-y-8">
+                <div className="space-y-4">
+                  <h2 className="text-5xl font-headline font-bold text-primary tracking-tight">Arquitete seu Destino</h2>
+                  <div className="h-1.5 w-24 bg-accent/20 rounded-full" />
+                </div>
+                <p className="text-xl text-muted-foreground leading-relaxed">
+                  Ao ingressar no Projeto Multiverso, você não é apenas um observador. Você é o arquiteto fundamental de uma nova linha temporal.
                 </p>
-                <ul className="space-y-4">
+                <div className="grid sm:grid-cols-2 gap-6">
                   {[
-                    "Criação de universos únicos",
-                    "Manifestação de propósitos",
-                    "Rede de arquitetos dimensionais",
-                    "Identidade visual universal"
+                    "Manifestação Dimensional",
+                    "Propósitos Autênticos",
+                    "Conexão de Criadores",
+                    "Segurança de Dados Real"
                   ].map((item, i) => (
-                    <li key={i} className="flex items-center gap-3">
-                      <div className="bg-accent/10 p-1 rounded-full text-accent">
-                        <Globe className="h-5 w-5" />
+                    <div key={i} className="flex items-center gap-4 p-4 rounded-xl border border-border bg-secondary/20">
+                      <div className="bg-primary/10 p-2 rounded-lg text-primary">
+                        <Sparkles className="h-5 w-5" />
                       </div>
-                      <span className="font-medium">{item}</span>
-                    </li>
+                      <span className="font-semibold text-sm">{item}</span>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </div>
-              <div>
-                <ProfileForm />
+              <div className="relative">
+                <div className="absolute -inset-4 bg-primary/5 blur-3xl rounded-full" />
+                <div className="relative">
+                  <ProfileForm />
+                </div>
               </div>
             </div>
           </div>
         </section>
 
         {/* Explorers List Section */}
-        <section id="explorers" className="py-24 bg-secondary/30">
+        <section id="explorers" className="py-32 bg-secondary/30">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-16 space-y-4">
-              <div className="flex justify-center items-center gap-2 text-primary font-bold uppercase tracking-tighter text-sm">
-                <Users className="h-5 w-5" /> Catalogação Real
+            <div className="text-center mb-20 space-y-4">
+              <div className="inline-flex items-center gap-2 text-accent font-bold uppercase tracking-widest text-xs py-1 px-3 border border-accent/20 rounded-full">
+                <Users className="h-3 w-3" /> Catalogação de Criadores
               </div>
-              <h2 className="text-4xl font-headline font-bold">Diretório de Criadores</h2>
-              <p className="text-muted-foreground max-w-xl mx-auto">
-                Apenas exploradores autênticos que registraram seus planos de criação universal.
+              <h2 className="text-5xl font-headline font-bold text-primary">Exploradores Ativos</h2>
+              <p className="text-muted-foreground max-w-xl mx-auto text-lg">
+                Visualizando apenas perfis verificados e arquiteturas universais genuínas.
               </p>
             </div>
 
             {isListLoading ? (
-              <div className="flex flex-col items-center justify-center py-20 gap-4">
-                <Loader2 className="h-12 w-12 text-primary animate-spin" />
-                <p className="text-muted-foreground animate-pulse">Sintonizando frequências multiversais...</p>
+              <div className="flex flex-col items-center justify-center py-20 gap-6">
+                <div className="relative">
+                  <div className="h-16 w-16 border-4 border-primary/10 border-t-primary rounded-full animate-spin" />
+                  <Globe className="h-6 w-6 text-primary absolute inset-0 m-auto animate-pulse" />
+                </div>
+                <p className="text-muted-foreground font-medium animate-pulse">Sintonizando frequências reais...</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
                 {explorers?.map((explorer) => (
                   <ExplorerCard key={explorer.id} explorer={explorer} />
                 ))}
@@ -137,28 +150,31 @@ export default function Home() {
             )}
 
             {!isListLoading && (!explorers || explorers.length === 0) && (
-              <div className="text-center py-20 bg-card rounded-2xl border-2 border-dashed border-primary/20">
-                <Globe className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-20" />
-                <p className="text-muted-foreground">Nenhum criador autêntico catalogado nesta linha temporal. Comece a sua jornada acima!</p>
+              <div className="text-center py-24 bg-white/50 backdrop-blur-md rounded-3xl border-2 border-dashed border-primary/10">
+                <Globe className="h-16 w-16 text-primary/20 mx-auto mb-6" />
+                <p className="text-xl text-muted-foreground font-medium">Nenhum criador catalogado nesta linha temporal.</p>
+                <p className="text-sm text-muted-foreground/60 mt-2">Seja o primeiro a manifestar seu universo.</p>
               </div>
             )}
           </div>
         </section>
       </main>
 
-      <footer className="bg-primary text-primary-foreground py-12 border-t border-accent/20">
+      <footer className="bg-white py-16 border-t border-border">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-            <Link href="/" className="hover:opacity-80 transition-opacity">
-              <Logo className="text-white" />
+          <div className="flex flex-col md:flex-row justify-between items-center gap-12">
+            <Link href="/" className="hover:opacity-70 transition-opacity">
+              <Logo className="text-primary scale-110" />
             </Link>
             
-            <p className="text-sm text-primary-foreground/60 text-center">
-              © {currentYear || "..."} Projeto Multiverso. Apenas dados reais protegidos por segurança dimensional.
-            </p>
-
-            <div className="flex gap-4">
-              <span className="text-xs font-mono bg-accent/20 px-3 py-1 rounded-full text-accent-foreground">Status: Conectado</span>
+            <div className="flex flex-col items-center md:items-end gap-4 text-center md:text-right">
+              <p className="text-sm font-medium text-muted-foreground">
+                © {currentYear || "..."} Projeto Multiverso. Todos os dados são protegidos por criptografia dimensional.
+              </p>
+              <div className="flex gap-4">
+                <span className="text-[10px] font-mono bg-secondary px-3 py-1 rounded-full text-muted-foreground uppercase tracking-widest">Protocolo: V-2.0</span>
+                <span className="text-[10px] font-mono bg-green-50 px-3 py-1 rounded-full text-green-700 uppercase tracking-widest border border-green-100">Status: Sincronizado</span>
+              </div>
             </div>
           </div>
         </div>
