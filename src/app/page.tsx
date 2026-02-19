@@ -1,11 +1,13 @@
 "use client"
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Navbar } from "@/components/multiverso/navbar";
 import { ProfileForm } from "@/components/multiverso/profile-form";
 import { ExplorerCard } from "@/components/multiverso/explorer-card";
+import { Logo } from "@/components/multiverso/logo";
 import { Button } from "@/components/ui/button";
-import { Globe, Users, ArrowDown, Sparkles, Loader2 } from "lucide-react";
+import { Users, ArrowDown, Sparkles, Loader2, Globe } from "lucide-react";
 import { useCollection, useMemoFirebase, useFirestore, useAuth, useUser } from "@/firebase";
 import { collection, query, orderBy } from "firebase/firestore";
 import { initiateAnonymousSignIn } from "@/firebase/non-blocking-login";
@@ -93,8 +95,8 @@ export default function Home() {
                     "Identidade visual universal"
                   ].map((item, i) => (
                     <li key={i} className="flex items-center gap-3">
-                      <div className="bg-accent/10 p-1 rounded-full">
-                        <Globe className="h-5 w-5 text-accent" />
+                      <div className="bg-accent/10 p-1 rounded-full text-accent">
+                        <Globe className="h-5 w-5" />
                       </div>
                       <span className="font-medium">{item}</span>
                     </li>
@@ -147,12 +149,9 @@ export default function Home() {
       <footer className="bg-primary text-primary-foreground py-12 border-t border-accent/20">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-            <div className="flex items-center gap-2">
-              <div className="bg-white p-1.5 rounded-md">
-                <Globe className="h-5 w-5 text-primary" />
-              </div>
-              <span className="font-headline text-lg font-bold tracking-tight">PROJETO MULTIVERSO</span>
-            </div>
+            <Link href="/" className="hover:opacity-80 transition-opacity">
+              <Logo className="text-white" />
+            </Link>
             
             <p className="text-sm text-primary-foreground/60 text-center">
               © {currentYear || "..."} Projeto Multiverso. Apenas dados reais protegidos por segurança dimensional.
