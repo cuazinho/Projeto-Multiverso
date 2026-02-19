@@ -1,0 +1,23 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "multiverse-hero",
+      "description": "Vast cosmos with swirling galaxies and stars",
+      "imageUrl": "https://picsum.photos/seed/space-cosmos/1200/800",
+      "imageHint": "space galaxy"
+    },
+    {
+      "id": "explorer-avatar-1",
+      "description": "Astronaut in a colorful space background",
+      "imageUrl": "https://picsum.photos/seed/astro1/200/200",
+      "imageHint": "astronaut"
+    },
+    {
+      "id": "explorer-avatar-2",
+      "description": "Cyberpunk character in neon lights",
+      "imageUrl": "https://picsum.photos/seed/cyber1/200/200",
+      "imageHint": "cyberpunk"
+    }
+  ]
+}
