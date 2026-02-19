@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "ExplorerProfile": {
@@ -18,13 +19,29 @@
           "type": "string",
           "description": "The unique identification name chosen by the explorer across the multiverse."
         },
+        "age": {
+          "type": "integer",
+          "description": "The age of the explorer."
+        },
+        "height": {
+          "type": "string",
+          "description": "The height of the explorer."
+        },
         "purpose": {
           "type": "string",
           "description": "The explorer's stated purpose or mission within the multiverse."
         },
+        "story": {
+          "type": "string",
+          "description": "The personal history or background story of the explorer."
+        },
         "universeName": {
           "type": "string",
           "description": "The name of the primary universe associated with the explorer."
+        },
+        "ndi": {
+          "type": "string",
+          "description": "Unique Identification Number (NDI) following the pattern 4872173 - x."
         },
         "profileImageUrl": {
           "type": "string",
@@ -46,8 +63,12 @@
         "id",
         "name",
         "identificationName",
+        "age",
+        "height",
         "purpose",
+        "story",
         "universeName",
+        "ndi",
         "createdAt"
       ]
     }
@@ -67,16 +88,15 @@
           "schema": {
             "$ref": "#/backend/entities/ExplorerProfile"
           },
-          "description": "Stores individual explorer profiles. The document ID (`{explorerProfileId}`) is the user's UID. The 'id' field within the document contains the user's UID, serving as the denormalized owner ID for authorization independence. This ensures each profile is directly linked to an authenticated user and allows for direct ownership checks in security rules.",
+          "description": "Stores individual explorer profiles.",
           "params": [
             {
               "name": "explorerProfileId",
-              "description": "The unique identifier for the explorer profile, which is also the Firebase Authentication UID of the user who owns this profile."
+              "description": "The unique identifier for the explorer profile (UID)."
             }
           ]
         }
       }
-    ],
-    "reasoning": "The Firestore structure is designed around a single top-level collection: '/explorer_profiles'. Each document in this collection represents an 'ExplorerProfile' and its document ID (`{explorerProfileId}`) is set to the authenticated user's unique ID (UID). This choice directly addresses the core principles:\n\n1.  **Authorization Independence (CRITICAL):** By setting the document ID to the user's UID and ensuring the 'id' field within the ExplorerProfile document also contains this UID, ownership information is intrinsically denormalized into the document itself. This eliminates the need for expensive and complex `get()` calls in security rules to check ownership or parent data. Rules can directly compare `request.auth.uid` with `explorerProfileId` (the document ID) and `resource.data.id` (the denormalized owner ID within the document).\n\n2.  **Clarity of Intent (Debuggability):** The path `/explorer_profiles/{explorerProfileId}` clearly indicates that each document is a profile owned by the user whose UID matches `{explorerProfileId}`. The 'id' field inside the document explicitly confirms this ownership, making authorization logic in rules straightforward and easy to debug.\n\n3.  **DBAC (No Custom Claims):** Authorization relies solely on `request.auth.uid` by comparing it directly against the document ID and the `id` field within the document.\n\n4.  **QAPs (Rules are not Filters):** The user's request, \"eu não quero exploradores falsos, quero que penas os verdadeiros sejam mostrados\" (I don't want fake explorers, I want only the true ones to be shown), is handled by ensuring that only profiles created by authenticated users exist in the collection. The security rules will mandate that `request.auth.uid` must be present and must match the document ID (`explorerProfileId`) and the `id` field in the document during creation. For listing, the collection `/explorer_profiles` will be made readable to *any authenticated user* (`request.auth.uid != null`). This ensures that the `list` operation retrieves all 'true' explorer profiles without requiring client-side filtering or inefficient rule-based filtering, thus adhering to QAPs.\n\n5.  **Structural Segregation:** All ExplorerProfile documents share the same security posture within the `/explorer_profiles` collection. There's no mixing of public/private or draft/published states, maintaining a homogeneous security profile for all documents in this collection.\n\nThis design offers a secure, scalable, and easily auditable structure for managing explorer profiles, aligning perfectly with all mandated design principles and strategies."
+    ]
   }
 }

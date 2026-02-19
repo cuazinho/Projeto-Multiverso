@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -18,7 +19,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Camera, Send, Sparkles, Loader2, ShieldCheck } from "lucide-react"
+import { Camera, Send, Loader2, ShieldCheck, History, Ruler, Calendar } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 import { useFirestore, useUser, useAuth } from "@/firebase"
 import { doc, serverTimestamp } from "firebase/firestore"
@@ -28,7 +29,10 @@ import { initiateAnonymousSignIn } from "@/firebase/non-blocking-login"
 const profileSchema = z.object({
   name: z.string().min(2, "Nome é obrigatório"),
   identificationName: z.string().min(2, "ID é obrigatório").regex(/^[a-zA-Z0-9_]+$/, "ID deve conter apenas letras, números e sublinhados"),
+  age: z.coerce.number().min(1, "Idade inválida").max(999, "Idade avançada demais para esta dimensão"),
+  height: z.string().min(2, "Informe sua altura (ex: 1.80m)"),
   purpose: z.string().min(10, "Conte-nos mais sobre seu propósito"),
+  story: z.string().min(20, "Sua história deve ter pelo menos 20 caracteres"),
   universeName: z.string().min(2, "Qual universo você quer criar?"),
   profileImageUrl: z.string().optional(),
 })
@@ -47,7 +51,10 @@ export function ProfileForm() {
     defaultValues: {
       name: "",
       identificationName: "",
+      age: undefined,
+      height: "",
       purpose: "",
+      story: "",
       universeName: "",
       profileImageUrl: "",
     },
@@ -69,10 +76,16 @@ export function ProfileForm() {
       return;
     }
 
+    // Gerar um número aleatório de 7 dígitos para garantir unicidade visual
+    // O prefixo fixo é 4872173. O "x" será um número de 7 dígitos.
+    const uniqueSuffix = Math.floor(1000000 + Math.random() * 9000000);
+    const ndi = `4872173 - ${uniqueSuffix}`;
+
     const docId = currentUser.uid;
     const finalData = { 
       ...data, 
       id: docId,
+      ndi,
       profileImageUrl: imagePreview || `https://picsum.photos/seed/${data.identificationName}/200/200`,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
@@ -85,7 +98,7 @@ export function ProfileForm() {
       
       toast({
         title: "Manifestação Registrada",
-        description: "Seu perfil foi catalogado no diretório real.",
+        description: `Seu NDI é: ${ndi}. Perfil catalogado com sucesso.`,
       })
       form.reset()
       setImagePreview(null)
@@ -122,7 +135,7 @@ export function ProfileForm() {
         <div className="space-y-1">
           <CardTitle className="text-3xl font-headline font-bold text-primary">Inscrição de Criador</CardTitle>
           <CardDescription className="text-sm font-medium">
-            Sua identidade universal protegida por criptografia real.
+            Preencha sua ficha de manifestação dimensional completa.
           </CardDescription>
         </div>
       </CardHeader>
@@ -153,7 +166,7 @@ export function ProfileForm() {
                   <FormItem>
                     <FormLabel className="text-xs uppercase font-black tracking-widest opacity-70">Nome Completo</FormLabel>
                     <FormControl>
-                      <Input placeholder="Seu nome real" {...field} className="bg-white/50" />
+                      <Input placeholder="Nome real" {...field} className="bg-white/50" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -166,7 +179,40 @@ export function ProfileForm() {
                   <FormItem>
                     <FormLabel className="text-xs uppercase font-black tracking-widest opacity-70">Identificação ID</FormLabel>
                     <FormControl>
-                      <Input placeholder="seu_id" {...field} className="bg-white/50" />
+                      <Input placeholder="ex: explorador_01" {...field} className="bg-white/50" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
+                name="age"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs uppercase font-black tracking-widest opacity-70 flex items-center gap-2">
+                      <Calendar className="h-3 w-3" /> Idade
+                    </FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="Anos terrestres" {...field} className="bg-white/50" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="height"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs uppercase font-black tracking-widest opacity-70 flex items-center gap-2">
+                      <Ruler className="h-3 w-3" /> Altura
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="ex: 1.85m" {...field} className="bg-white/50" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -195,9 +241,25 @@ export function ProfileForm() {
                 <FormItem>
                   <FormLabel className="text-xs uppercase font-black tracking-widest opacity-70">Propósito da Criação</FormLabel>
                   <FormControl>
+                    <Input placeholder="Qual sua missão principal?" {...field} className="bg-white/50" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="story"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-xs uppercase font-black tracking-widest opacity-70 flex items-center gap-2">
+                    <History className="h-3 w-3" /> História Pessoal
+                  </FormLabel>
+                  <FormControl>
                     <Textarea 
-                      placeholder="Descreva a motivação fundamental da sua nova realidade..." 
-                      className="min-h-[120px] bg-white/50 resize-none"
+                      placeholder="Conte sobre sua trajetória através das dimensões..." 
+                      className="min-h-[100px] bg-white/50 resize-none"
                       {...field} 
                     />
                   </FormControl>
