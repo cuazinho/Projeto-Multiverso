@@ -6,6 +6,7 @@ import { Navbar } from "@/components/multiverso/navbar";
 import { ProfileForm } from "@/components/multiverso/profile-form";
 import { ExplorerCard } from "@/components/multiverso/explorer-card";
 import { Logo } from "@/components/multiverso/logo";
+import { PalmeChat } from "@/components/multiverso/palme-chat";
 import { Button } from "@/components/ui/button";
 import { Users, ArrowDown, Sparkles, Globe, ShieldCheck, MessageCircle, Trash2 } from "lucide-react";
 import { useCollection, useMemoFirebase, useFirestore, useAuth, useUser, deleteDocumentNonBlocking } from "@/firebase";
@@ -219,6 +220,9 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Agente Virtual Palme */}
+      <PalmeChat />
     </div>
   );
 }
