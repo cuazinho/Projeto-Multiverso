@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Navbar } from "@/components/multiverso/navbar";
 import { ProfileForm } from "@/components/multiverso/profile-form";
 import { ExplorerCard } from "@/components/multiverso/explorer-card";
@@ -13,6 +13,11 @@ import { initiateAnonymousSignIn } from "@/firebase/non-blocking-login";
 export default function Home() {
   const { firestore, auth } = useFirestore() ? { firestore: useFirestore(), auth: useAuth() } : { firestore: null, auth: null };
   const { user, isUserLoading } = useUser();
+  const [currentYear, setCurrentYear] = useState<number | null>(null);
+
+  useEffect(() => {
+    setCurrentYear(new Date().getFullYear());
+  }, []);
 
   // Auto sign-in to ensure "true" explorers only
   useEffect(() => {
@@ -150,7 +155,7 @@ export default function Home() {
             </div>
             
             <p className="text-sm text-primary-foreground/60 text-center">
-              © {new Date().getFullYear()} Projeto Multiverso. Apenas dados reais protegidos por segurança dimensional.
+              © {currentYear || "..."} Projeto Multiverso. Apenas dados reais protegidos por segurança dimensional.
             </p>
 
             <div className="flex gap-4">
