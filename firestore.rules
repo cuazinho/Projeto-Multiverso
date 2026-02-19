@@ -1,0 +1,86 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * MULTIVERSE EXPLORER SECURITY RULES
+     *
+     * Core Philosophy:
+     * This ruleset implements a strict identity-based ownership model for data modification, while 
+     * ensuring a "walled garden" approach for data discovery. Authenticated users are considered 
+     * "true" explorers and are granted read access to the community, while "fake" or unauthenticated 
+     * entities are barred from both reading and writing.
+     *
+     * Data Structure:
+     * - /explorer_profiles/{explorerProfileId}: A top-level collection where each document represents
+     *   a user's explorer persona. The {explorerProfileId} is the user's Firebase Authentication UID.
+     *
+     * Key Security Decisions:
+     * - Ownership via Path: Authorization is tied directly to the document ID, which must match the 
+     *   user's UID.
+     * - Authenticated Discovery: To fulfill the requirement of showing only "true" explorers, the 
+     *   ability to list or get profiles is restricted to signed-in users (request.auth != null).
+     * - Denormalization for Authorization: The 'id' field within the ExplorerProfile document is 
+     *   required to match the document ID (the user's UID). This creates a self-contained 
+     *   authorization record that does not require cross-collection lookups.
+     * - Prototyping Flexibility: While ownership and relational integrity (UID consistency) are 
+     *   strictly enforced, specific data schemas (types, optional fields) are not validated here 
+     *   to allow for rapid frontend iteration.
+     */
+
+    // --- GLOBAL HELPER FUNCTIONS ---
+
+    /** Checks if the request is made by a signed-in user. */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /** Checks if the provided ID matches the authenticated user's UID. */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /** 
+     * Checks if the user is the owner and the document exists. 
+     * Used for state-changing operations like update and delete.
+     */
+    function isExistingOwner(userId) {
+      return resource != null && isOwner(userId);
+    }
+
+    // --- COLLECTION RULES ---
+
+    /**
+     * @description Rules for the explorer profiles. Only authenticated users can see profiles, 
+     * and only the account owner can manage their specific profile data.
+     * @path /explorer_profiles/{explorerProfileId}
+     * @allow (get/list) If the user is authenticated (isSignedIn()).
+     * @allow (create) If the authenticated user's UID matches the path ID and the internal 'id' field.
+     * @deny (write) If the user is not the owner of the specific UID path.
+     * @principle Ownership-based access control with relational integrity validation.
+     */
+    match /explorer_profiles/{explorerProfileId} {
+      
+      // Read: Any "true" (authenticated) explorer can view the list and individual profiles.
+      allow get, list: if isSignedIn();
+
+      // Create: Users can only create a profile where the ID matches their own UID.
+      // Relational Integrity: The internal 'id' must match the document path.
+      allow create: if isOwner(explorerProfileId) && request.resource.data.id == explorerProfileId;
+
+      // Update: Only the owner can update. 
+      // Relational Integrity: The 'id' field is immutable to prevent ownership hijacking.
+      allow update: if isExistingOwner(explorerProfileId) && request.resource.data.id == resource.data.id;
+
+      // Delete: Only the owner can delete their own profile.
+      allow delete: if isExistingOwner(explorerProfileId);
+    }
+  }
+}
+
+/**
+ * DEVELOPER NOTES (Prototyping Mode):
+ * 1. Schema enforcement (types, lengths, etc.) is omitted for flexibility.
+ * 2. Relational integrity is enforced: The 'id' field in the document MUST match the UID.
+ * 3. Ensure your frontend sends the user's UID in the 'id' field when calling 'set' or 'add'.
+ */
