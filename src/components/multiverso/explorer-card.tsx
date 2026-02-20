@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Compass, Sparkles, UserCheck, Ruler, Calendar, Fingerprint } from "lucide-react";
+import { Compass, Sparkles, UserCheck, Ruler, Calendar, Fingerprint, Stars } from "lucide-react";
 
 interface ExplorerCardProps {
   explorer: {
@@ -20,67 +20,88 @@ interface ExplorerCardProps {
 
 export function ExplorerCard({ explorer }: ExplorerCardProps) {
   return (
-    <Card className="overflow-hidden hover:shadow-2xl transition-all duration-500 group border-border/50 bg-white/40 backdrop-blur-md hover:-translate-y-2 flex flex-col h-full">
+    <Card className="overflow-hidden group glass-morphism mystic-glow flex flex-col h-full rounded-[2rem] border-slate-200/50">
       <CardHeader className="p-0 relative">
-        <div className="h-28 bg-gradient-to-br from-slate-200 to-slate-100 group-hover:from-slate-300 transition-colors" />
-        <div className="absolute top-4 right-4 z-10">
-          <Badge variant="outline" className="bg-white/80 backdrop-blur-sm border-primary/20 text-[9px] font-mono tracking-tighter">
+        <div className="h-40 overflow-hidden">
+          <img 
+            src={`https://picsum.photos/seed/${explorer.identificationName}-bg/600/400`} 
+            alt="Fundo Cósmico" 
+            className="w-full h-full object-cover grayscale opacity-20 group-hover:scale-110 transition-transform duration-700"
+            data-ai-hint="mystic texture"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white" />
+        </div>
+        <div className="absolute top-6 right-6 z-10">
+          <Badge variant="outline" className="bg-white/90 backdrop-blur-md border-slate-200 text-slate-900 text-[10px] font-black tracking-widest px-3 py-1 uppercase rounded-full">
             NDI: {explorer.ndi}
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="px-6 pb-8 -mt-12 flex-1 flex flex-col">
+      <CardContent className="px-8 pb-10 -mt-20 flex-1 flex flex-col">
         <div className="flex flex-col items-center text-center">
-          <Avatar className="h-24 w-24 border-[6px] border-white shadow-xl group-hover:scale-105 transition-transform">
-            <AvatarImage src={explorer.profileImageUrl} alt={explorer.name} className="object-cover" />
-            <AvatarFallback className="bg-primary text-primary-foreground text-2xl font-bold">
-              {explorer.name.charAt(0)}
-            </AvatarFallback>
-          </Avatar>
+          <div className="relative">
+            <Avatar className="h-32 w-32 border-[8px] border-white shadow-2xl group-hover:scale-105 transition-transform duration-500">
+              <AvatarImage src={explorer.profileImageUrl} alt={explorer.name} className="object-cover" />
+              <AvatarFallback className="bg-slate-900 text-white text-3xl font-bold">
+                {explorer.name.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="absolute -bottom-2 -right-2 bg-white p-2 rounded-full shadow-lg border border-slate-100">
+              <Stars className="h-5 w-5 text-slate-900" />
+            </div>
+          </div>
           
-          <div className="mt-6 space-y-1">
-            <div className="flex items-center justify-center gap-1.5">
-              <h3 className="text-xl font-headline font-bold text-primary">{explorer.name}</h3>
-              <UserCheck className="h-4 w-4 text-green-600" />
-            </div>
-            <p className="text-xs text-muted-foreground font-mono uppercase tracking-widest">@{explorer.identificationName}</p>
+          <div className="mt-8 space-y-2">
+            <h3 className="text-2xl font-headline font-bold text-slate-900 tracking-tight">{explorer.name}</h3>
+            <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.3em]">@{explorer.identificationName}</p>
           </div>
 
-          <div className="mt-4 flex justify-center gap-4">
-            <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-bold uppercase tracking-tight">
-              <Calendar className="h-3 w-3 text-accent" /> {explorer.age} anos
+          <div className="mt-6 flex justify-center gap-6">
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-[9px] font-black uppercase text-slate-300 tracking-widest">Idade</span>
+              <span className="text-sm font-bold text-slate-600">{explorer.age} ciclos</span>
             </div>
-            <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-bold uppercase tracking-tight">
-              <Ruler className="h-3 w-3 text-accent" /> {explorer.height}
+            <div className="h-8 w-px bg-slate-100" />
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-[9px] font-black uppercase text-slate-300 tracking-widest">Altura</span>
+              <span className="text-sm font-bold text-slate-600">{explorer.height}</span>
             </div>
           </div>
 
-          <div className="mt-6 flex flex-col items-center gap-2 w-full">
-            <span className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] font-bold">Arquitetura Universal:</span>
-            <Badge variant="secondary" className="w-full py-1.5 justify-center gap-2 bg-secondary text-primary border-none font-bold text-[11px]">
-              <Compass className="h-3.5 w-3.5" /> {explorer.universeName}
-            </Badge>
-          </div>
-
-          <div className="mt-6 relative w-full px-2 space-y-4 text-left">
-            <div>
-              <p className="text-[9px] uppercase font-black text-muted-foreground tracking-widest mb-1">Propósito</p>
-              <p className="text-xs text-muted-foreground italic line-clamp-2 leading-relaxed">
-                "{explorer.purpose}"
+          <div className="mt-10 w-full space-y-8 text-left">
+            <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/50">
+              <div className="flex items-center gap-2 mb-3">
+                <Compass className="h-4 w-4 text-slate-400" />
+                <span className="text-[9px] uppercase font-black text-slate-400 tracking-[0.2em]">Domínio Universal</span>
+              </div>
+              <p className="text-sm font-bold text-slate-800 tracking-tight">
+                {explorer.universeName}
               </p>
             </div>
-            <div>
-              <p className="text-[9px] uppercase font-black text-muted-foreground tracking-widest mb-1">História</p>
-              <p className="text-xs text-muted-foreground line-clamp-3 leading-relaxed">
-                {explorer.story}
-              </p>
+
+            <div className="space-y-6">
+              <div>
+                <span className="text-[9px] uppercase font-black text-slate-300 tracking-[0.2em] mb-2 block">Propósito</span>
+                <p className="text-sm text-slate-500 italic leading-relaxed line-clamp-2">
+                  "{explorer.purpose}"
+                </p>
+              </div>
+              <div>
+                <span className="text-[9px] uppercase font-black text-slate-300 tracking-[0.2em] mb-2 block">Registros</span>
+                <p className="text-sm text-slate-500 leading-relaxed line-clamp-3 font-light">
+                  {explorer.story}
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="mt-auto pt-6 border-t border-border w-full flex justify-center items-center gap-2 text-primary/40 group-hover:text-primary transition-colors">
-          <Fingerprint className="h-4 w-4" />
-          <span className="text-[10px] uppercase tracking-[0.3em] font-black">Registro Autêntico</span>
+        <div className="mt-auto pt-10 border-t border-slate-100 w-full flex justify-between items-center opacity-40 group-hover:opacity-100 transition-opacity">
+          <div className="flex items-center gap-2">
+            <Fingerprint className="h-4 w-4 text-slate-900" />
+            <span className="text-[9px] uppercase tracking-[0.3em] font-black text-slate-900">Assinatura Autêntica</span>
+          </div>
+          <Sparkles className="h-4 w-4 text-slate-300" />
         </div>
       </CardContent>
     </Card>

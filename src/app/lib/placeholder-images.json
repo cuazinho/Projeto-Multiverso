@@ -2,22 +2,22 @@
 {
   "placeholderImages": [
     {
-      "id": "multiverse-hero",
-      "description": "Vast cosmos with swirling galaxies and stars",
-      "imageUrl": "https://picsum.photos/seed/space-cosmos/1200/800",
-      "imageHint": "space galaxy"
+      "id": "hero-nebula",
+      "description": "Uma nebulosa mística em tons de cinza e prata",
+      "imageUrl": "https://picsum.photos/seed/mystic-void/1920/1080",
+      "imageHint": "nebula space"
     },
     {
-      "id": "explorer-avatar-1",
-      "description": "Astronaut in a colorful space background",
-      "imageUrl": "https://picsum.photos/seed/astro1/200/200",
-      "imageHint": "astronaut"
+      "id": "universe-architecture",
+      "description": "Arquitetura impossível flutuando no cosmos",
+      "imageUrl": "https://picsum.photos/seed/cosmic-arch/800/600",
+      "imageHint": "abstract architecture"
     },
     {
-      "id": "explorer-avatar-2",
-      "description": "Cyberpunk character in neon lights",
-      "imageUrl": "https://picsum.photos/seed/cyber1/200/200",
-      "imageHint": "cyberpunk"
+      "id": "explorer-avatar-default",
+      "description": "Silhueta mística de um explorador",
+      "imageUrl": "https://picsum.photos/seed/explorer-void/400/400",
+      "imageHint": "mystical silhouette"
     }
   ]
 }

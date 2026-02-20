@@ -1,50 +1,30 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 210 20% 98%;
     --foreground: 215 25% 10%;
     --card: 0 0% 100%;
     --card-foreground: 215 25% 15%;
     --popover: 0 0% 100%;
     --popover-foreground: 215 25% 10%;
-    --primary: 215 25% 27%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 210 20% 96%;
-    --secondary-foreground: 215 25% 27%;
-    --muted: 210 20% 90%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 215 20% 45%;
-    --accent-foreground: 0 0% 98%;
+    --primary: 215 25% 20%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 210 20% 90%;
+    --secondary-foreground: 215 25% 20%;
+    --muted: 210 20% 94%;
+    --muted-foreground: 215 16% 40%;
+    --accent: 215 10% 30%;
+    --accent-foreground: 210 20% 98%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 215 25% 27%;
-    --radius: 0.75rem;
-  }
-  .dark {
-    --background: 222 47% 11%;
-    --foreground: 213 31% 91%;
-    --card: 222 47% 11%;
-    --card-foreground: 213 31% 91%;
-    --popover: 222 47% 11%;
-    --popover-foreground: 213 31% 91%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222 47% 11%;
-    --secondary: 217 32% 17%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217 32% 17%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 217 32% 25%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217 32% 17%;
-    --input: 217 32% 17%;
-    --ring: 212 27% 83%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 214 32% 85%;
+    --input: 214 32% 85%;
+    --ring: 215 25% 20%;
+    --radius: 1rem;
   }
 }
 
@@ -53,9 +33,17 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-body;
+    @apply bg-background text-foreground font-body selection:bg-primary selection:text-primary-foreground;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-headline;
   }
+}
+
+.glass-morphism {
+  @apply bg-white/40 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.05)];
+}
+
+.mystic-glow {
+  @apply shadow-[0_0_40px_-15px_rgba(0,0,0,0.1)] hover:shadow-[0_0_50px_-10px_rgba(0,0,0,0.15)] transition-all duration-500;
 }

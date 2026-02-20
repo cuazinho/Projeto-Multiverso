@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Camera, Send, Loader2, ShieldCheck, History, Ruler, Calendar, Lock, Sparkles, UserCheck, LayoutDashboard } from "lucide-react"
+import { Camera, Send, Loader2, ShieldCheck, History, Ruler, Calendar, Lock, Sparkles, UserCheck, LayoutDashboard, Stars, Zap } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 import { useFirestore, useUser, useDoc, useMemoFirebase } from "@/firebase"
 import { doc, serverTimestamp } from "firebase/firestore"
@@ -44,7 +44,6 @@ export function ProfileForm() {
   const firestore = useFirestore();
   const { user } = useUser();
 
-  // Load existing profile for editing
   const profileRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return doc(firestore, "explorer_profiles", user.uid);
@@ -66,7 +65,6 @@ export function ProfileForm() {
     },
   })
 
-  // Pre-populate form when existing profile is loaded
   useEffect(() => {
     if (existingProfile) {
       form.reset({
@@ -88,22 +86,21 @@ export function ProfileForm() {
       toast({
         variant: "destructive",
         title: "Acesso Negado",
-        description: "Você precisa estar logado para manifestar seu perfil.",
+        description: "Entre na rede para manifestar sua presença.",
       })
       return;
     }
     
     setIsSubmitting(true)
 
-    // Keep existing NDI or generate a new one if it's a new profile
     const ndi = existingProfile?.ndi || `4872173 - ${Math.floor(1000000 + Math.random() * 9000000)}`;
-
     const docId = user.uid;
+    
     const finalData = { 
       ...data, 
       id: docId,
       ndi,
-      profileImageUrl: imagePreview || `https://picsum.photos/seed/${data.identificationName}/200/200`,
+      profileImageUrl: imagePreview || `https://picsum.photos/seed/${data.identificationName}/400/400`,
       createdAt: existingProfile?.createdAt || serverTimestamp(),
       updatedAt: serverTimestamp()
     }
@@ -112,15 +109,14 @@ export function ProfileForm() {
     
     try {
       setDocumentNonBlocking(docRef, finalData, { merge: true });
-      
       toast({
-        title: existingProfile ? "Manifestação Atualizada" : "Manifestação Registrada",
-        description: `Protocolo ${ndi} sincronizado com sucesso.`,
+        title: existingProfile ? "Manifestação Sincronizada" : "Universo Manifestado",
+        description: `Protocolo ${ndi} registrado com sucesso.`,
       })
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Falha na Transmissão",
+        title: "Erro de Frequência",
         description: "Houve uma interferência dimensional. Tente novamente.",
       })
     } finally {
@@ -132,28 +128,26 @@ export function ProfileForm() {
     const file = e.target.files?.[0]
     if (file) {
       const reader = new FileReader()
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string)
-      }
+      reader.onloadend = () => setImagePreview(reader.result as string)
       reader.readAsDataURL(file)
     }
   }
 
   if (!user) {
     return (
-      <Card className="w-full shadow-2xl border-slate-200 bg-white/80 backdrop-blur-xl py-12">
-        <CardContent className="flex flex-col items-center text-center space-y-6">
-          <div className="p-6 bg-slate-100 rounded-full">
-            <Lock className="h-12 w-12 text-primary opacity-20" />
+      <Card className="w-full bg-white rounded-[2.5rem] p-12 text-center border-slate-100 shadow-2xl">
+        <CardContent className="space-y-10">
+          <div className="p-10 bg-slate-50 w-fit mx-auto rounded-full">
+            <Lock className="h-16 w-16 text-slate-200" />
           </div>
-          <div className="space-y-2">
-            <h3 className="text-2xl font-headline font-bold text-primary">Acesso Restrito</h3>
-            <p className="text-muted-foreground max-w-[280px]">
-              Para registrar ou editar sua identidade no multiverso, você deve primeiro entrar na rede.
+          <div className="space-y-4">
+            <h3 className="text-4xl font-headline font-bold text-slate-900">Linha Protegida</h3>
+            <p className="text-xl text-slate-400 font-light max-w-sm mx-auto">
+              Sua identidade dimensional precisa ser validada antes da manifestação.
             </p>
           </div>
-          <Button variant="outline" className="rounded-full px-8" asChild>
-            <a href="#navbar">Subir para Login</a>
+          <Button variant="outline" className="rounded-full h-16 px-12 text-lg font-bold border-slate-200 hover:bg-slate-50" asChild>
+            <a href="#navbar">Subir para Identificação</a>
           </Button>
         </CardContent>
       </Card>
@@ -162,60 +156,58 @@ export function ProfileForm() {
 
   if (isProfileLoading) {
     return (
-      <Card className="w-full shadow-2xl border-slate-200 bg-white/80 backdrop-blur-xl py-24 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary opacity-50" />
+      <Card className="w-full h-[600px] flex items-center justify-center bg-white rounded-[2.5rem] border-slate-100">
+        <Loader2 className="h-12 w-12 animate-spin text-slate-200" />
       </Card>
     );
   }
 
   return (
-    <Card className="w-full shadow-2xl border-slate-200 bg-white/80 backdrop-blur-xl overflow-hidden">
-      <div className="h-2 bg-primary w-full" />
-      <CardHeader className="text-center space-y-4 pt-8">
+    <Card className="w-full bg-white rounded-[2.5rem] border-slate-100 shadow-2xl overflow-hidden">
+      <div className="h-4 bg-slate-900 w-full" />
+      <CardHeader className="text-center p-12 space-y-6">
         <div className="flex justify-center">
-          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-            {existingProfile ? <LayoutDashboard className="h-10 w-10 text-primary" /> : <ShieldCheck className="h-10 w-10 text-primary" />}
+          <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100 relative">
+            {existingProfile ? <Zap className="h-10 w-10 text-slate-900" /> : <Sparkles className="h-10 w-10 text-slate-900" />}
+            <Stars className="h-5 w-5 text-slate-200 absolute -top-2 -right-2" />
           </div>
         </div>
-        <div className="space-y-1">
-          <CardTitle className="text-3xl font-headline font-bold text-primary">
-            {existingProfile ? "Terminal de Edição" : "Inscrição de Criador"}
+        <div className="space-y-2">
+          <CardTitle className="text-4xl font-headline font-bold text-slate-900">
+            {existingProfile ? "Painel do Arquiteto" : "Iniciar Manifestação"}
           </CardTitle>
-          <CardDescription className="text-sm font-medium">
-            {existingProfile 
-              ? `Editando Protocolo Único: ${existingProfile.ndi}` 
-              : `Registrado como: ${user.email || user.displayName}`}
+          <CardDescription className="text-sm font-black uppercase tracking-[0.3em] text-slate-400">
+            {existingProfile ? `Editando Protocolo: ${existingProfile.ndi}` : "Sincronizando Nova Realidade"}
           </CardDescription>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-12 pb-16">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <div className="flex flex-col items-center justify-center">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-12">
+            <div className="flex flex-col items-center">
               <div className="relative group">
-                <Avatar className="h-32 w-32 border-4 border-white shadow-2xl ring-2 ring-primary/5">
+                <Avatar className="h-40 w-40 border-[10px] border-slate-50 shadow-2xl transition-all duration-500 group-hover:scale-105">
                   <AvatarImage src={imagePreview || ""} className="object-cover" />
-                  <AvatarFallback className="bg-slate-100">
-                    <Camera className="h-10 w-10 text-muted-foreground" />
+                  <AvatarFallback className="bg-slate-50">
+                    <Camera className="h-12 w-12 text-slate-200" />
                   </AvatarFallback>
                 </Avatar>
-                <label className="absolute inset-0 flex items-center justify-center bg-primary/40 rounded-full opacity-0 group-hover:opacity-100 transition-all cursor-pointer backdrop-blur-sm">
-                  <span className="text-white text-[10px] font-black uppercase tracking-widest">Alterar</span>
+                <label className="absolute inset-0 flex items-center justify-center bg-slate-900/60 rounded-full opacity-0 group-hover:opacity-100 transition-all cursor-pointer backdrop-blur-sm">
+                  <span className="text-white text-[10px] font-black uppercase tracking-[0.4em]">Trocar Avatar</span>
                   <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
                 </label>
               </div>
-              <p className="mt-4 text-[10px] text-muted-foreground uppercase font-black tracking-widest">Assinatura Visual</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs uppercase font-black tracking-widest opacity-70">Nome Completo</FormLabel>
+                    <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Nome Civil</FormLabel>
                     <FormControl>
-                      <Input placeholder="Seu nome" {...field} className="bg-white/50 rounded-xl" />
+                      <Input placeholder="Seu nome" {...field} className="h-14 bg-slate-50 border-none rounded-2xl px-6 focus-visible:ring-slate-900" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -226,9 +218,9 @@ export function ProfileForm() {
                 name="identificationName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs uppercase font-black tracking-widest opacity-70">Identificação ID</FormLabel>
+                    <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Identificador ID</FormLabel>
                     <FormControl>
-                      <Input placeholder="ex: explorador_01" {...field} className="bg-white/50 rounded-xl" />
+                      <Input placeholder="explorador_xyz" {...field} className="h-14 bg-slate-50 border-none rounded-2xl px-6 focus-visible:ring-slate-900" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -236,17 +228,15 @@ export function ProfileForm() {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <FormField
                 control={form.control}
                 name="age"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs uppercase font-black tracking-widest opacity-70 flex items-center gap-2">
-                      <Calendar className="h-3 w-3" /> Idade
-                    </FormLabel>
+                    <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Idade (Ciclos)</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="Anos" {...field} className="bg-white/50 rounded-xl" />
+                      <Input type="number" placeholder="00" {...field} className="h-14 bg-slate-50 border-none rounded-2xl px-6 focus-visible:ring-slate-900" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -257,11 +247,9 @@ export function ProfileForm() {
                 name="height"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs uppercase font-black tracking-widest opacity-70 flex items-center gap-2">
-                      <Ruler className="h-3 w-3" /> Altura
-                    </FormLabel>
+                    <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Estatura</FormLabel>
                     <FormControl>
-                      <Input placeholder="ex: 1.85m" {...field} className="bg-white/50 rounded-xl" />
+                      <Input placeholder="ex: 1.80m" {...field} className="h-14 bg-slate-50 border-none rounded-2xl px-6 focus-visible:ring-slate-900" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -269,15 +257,15 @@ export function ProfileForm() {
               />
             </div>
 
-            <div className="p-6 bg-slate-50/50 rounded-2xl border border-slate-100 space-y-6">
+            <div className="space-y-8 bg-slate-50 p-8 rounded-[2rem] border border-slate-100">
               <FormField
                 control={form.control}
                 name="universeName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs uppercase font-black tracking-widest opacity-70">Seu Único Mundo</FormLabel>
+                    <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-900">Designação do Mundo</FormLabel>
                     <FormControl>
-                      <Input placeholder="Nome do seu novo mundo" {...field} className="bg-white rounded-xl shadow-sm" />
+                      <Input placeholder="Nome da sua realidade" {...field} className="h-14 bg-white border-none rounded-2xl px-6 shadow-sm" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -289,9 +277,9 @@ export function ProfileForm() {
                 name="purpose"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs uppercase font-black tracking-widest opacity-70">Missão Primária</FormLabel>
+                    <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-900">Missão Primária</FormLabel>
                     <FormControl>
-                      <Input placeholder="Qual sua missão?" {...field} className="bg-white rounded-xl shadow-sm" />
+                      <Input placeholder="O que você busca?" {...field} className="h-14 bg-white border-none rounded-2xl px-6 shadow-sm" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -304,13 +292,11 @@ export function ProfileForm() {
               name="story"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs uppercase font-black tracking-widest opacity-70 flex items-center gap-2">
-                    <History className="h-3 w-3" /> Registros Históricos
-                  </FormLabel>
+                  <FormLabel className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Registros Históricos</FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="Conte sobre sua trajetória..." 
-                      className="min-h-[120px] bg-white/50 resize-none rounded-xl"
+                      placeholder="Sua trajetória através das dimensões..." 
+                      className="min-h-[160px] bg-slate-50 border-none rounded-2xl px-6 py-4 resize-none focus-visible:ring-slate-900"
                       {...field} 
                     />
                   </FormControl>
@@ -321,18 +307,15 @@ export function ProfileForm() {
 
             <Button 
               type="submit" 
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-[0.2em] h-14 rounded-2xl shadow-xl transition-all active:scale-95"
+              className="w-full bg-slate-900 hover:bg-black text-white font-black uppercase tracking-[0.4em] h-20 rounded-[1.5rem] shadow-2xl transition-all active:scale-95"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Atualizando...
-                </>
+                <Loader2 className="h-6 w-6 animate-spin" />
               ) : (
-                <>
-                  {existingProfile ? <Sparkles className="mr-2 h-5 w-5" /> : <Send className="mr-2 h-5 w-5" />}
-                  {existingProfile ? "Salvar Alterações" : "Iniciar Manifestação"}
-                </>
+                <span className="flex items-center gap-4">
+                  <Stars className="h-5 w-5" /> {existingProfile ? "Salvar Manifestação" : "Ativar Universo"}
+                </span>
               )}
             </Button>
           </form>
