@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -41,7 +40,7 @@ type ProfileFormValues = z.infer<typeof profileSchema>
 export function ProfileForm() {
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { firestore } = useFirestore() ? { firestore: useFirestore() } : { firestore: null };
+  const firestore = useFirestore();
   const { user } = useUser();
 
   // Load existing profile for editing

@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useEffect, useState } from "react";
@@ -9,13 +8,13 @@ import { ExplorerCard } from "@/components/multiverso/explorer-card";
 import { Logo } from "@/components/multiverso/logo";
 import { PalmeChat } from "@/components/multiverso/palme-chat";
 import { Button } from "@/components/ui/button";
-import { Users, ArrowDown, Sparkles, Globe, ShieldCheck, MessageCircle, Trash2, LogIn } from "lucide-react";
+import { Users, ArrowDown, Sparkles, Globe, ShieldCheck, MessageCircle, Trash2 } from "lucide-react";
 import { useCollection, useMemoFirebase, useFirestore, useUser, deleteDocumentNonBlocking } from "@/firebase";
 import { collection, query, orderBy, doc } from "firebase/firestore";
 import { toast } from "@/hooks/use-toast";
 
 export default function Home() {
-  const { firestore } = useFirestore() ? { firestore: useFirestore() } : { firestore: null };
+  const firestore = useFirestore();
   const { user } = useUser();
   const [currentYear, setCurrentYear] = useState<number | null>(null);
 
