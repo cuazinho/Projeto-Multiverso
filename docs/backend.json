@@ -9,7 +9,7 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the ExplorerProfile entity."
+          "description": "Unique identifier for the ExplorerProfile entity (Firebase UID)."
         },
         "name": {
           "type": "string",
@@ -37,7 +37,7 @@
         },
         "universeName": {
           "type": "string",
-          "description": "The name of the primary universe associated with the explorer."
+          "description": "The name of the universe the explorer wants to create."
         },
         "ndi": {
           "type": "string",
@@ -76,7 +76,8 @@
   "auth": {
     "providers": [
       "password",
-      "anonymous"
+      "anonymous",
+      "discord"
     ]
   },
   "firestore": {
@@ -88,7 +89,7 @@
           "schema": {
             "$ref": "#/backend/entities/ExplorerProfile"
           },
-          "description": "Stores individual explorer profiles.",
+          "description": "Stores individual explorer profiles indexed by their User UID.",
           "params": [
             {
               "name": "explorerProfileId",

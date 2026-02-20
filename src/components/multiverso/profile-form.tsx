@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -19,20 +19,20 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Camera, Send, Loader2, ShieldCheck, History, Ruler, Calendar, Lock } from "lucide-react"
+import { Camera, Send, Loader2, ShieldCheck, History, Ruler, Calendar, Lock, Sparkles, UserCheck } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
-import { useFirestore, useUser } from "@/firebase"
+import { useFirestore, useUser, useDoc, useMemoFirebase } from "@/firebase"
 import { doc, serverTimestamp } from "firebase/firestore"
 import { setDocumentNonBlocking } from "@/firebase/non-blocking-updates"
 
 const profileSchema = z.object({
   name: z.string().min(2, "Nome é obrigatório"),
   identificationName: z.string().min(2, "ID é obrigatório").regex(/^[a-zA-Z0-9_]+$/, "ID deve conter apenas letras, números e sublinhados"),
-  age: z.coerce.number().min(1, "Idade inválida").max(999, "Idade avançada demais para esta dimensão"),
+  age: z.coerce.number().min(1, "Idade inválida").max(999, "Idade avançada demais"),
   height: z.string().min(2, "Informe sua altura (ex: 1.80m)"),
   purpose: z.string().min(10, "Conte-nos mais sobre seu propósito"),
   story: z.string().min(20, "Sua história deve ter pelo menos 20 caracteres"),
-  universeName: z.string().min(2, "Qual universo você quer criar?"),
+  universeName: z.string().min(2, "Qual o nome do universo que você quer criar?"),
   profileImageUrl: z.string().optional(),
 })
 
@@ -43,6 +43,14 @@ export function ProfileForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { firestore } = useFirestore() ? { firestore: useFirestore() } : { firestore: null };
   const { user } = useUser();
+
+  // Load existing profile for editing
+  const profileRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, "explorer_profiles", user.uid);
+  }, [firestore, user]);
+
+  const { data: existingProfile, isLoading: isProfileLoading } = useDoc(profileRef);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -58,20 +66,37 @@ export function ProfileForm() {
     },
   })
 
+  // Pre-populate form when existing profile is loaded
+  useEffect(() => {
+    if (existingProfile) {
+      form.reset({
+        name: existingProfile.name,
+        identificationName: existingProfile.identificationName,
+        age: existingProfile.age,
+        height: existingProfile.height,
+        purpose: existingProfile.purpose,
+        story: existingProfile.story,
+        universeName: existingProfile.universeName,
+        profileImageUrl: existingProfile.profileImageUrl,
+      });
+      setImagePreview(existingProfile.profileImageUrl || null);
+    }
+  }, [existingProfile, form]);
+
   const onSubmit = async (data: ProfileFormValues) => {
     if (!firestore || !user) {
       toast({
         variant: "destructive",
         title: "Acesso Negado",
-        description: "Você precisa estar logado com seu e-mail para manifestar um perfil.",
+        description: "Você precisa estar logado para manifestar seu perfil.",
       })
       return;
     }
     
     setIsSubmitting(true)
 
-    const uniqueSuffix = Math.floor(1000000 + Math.random() * 9000000);
-    const ndi = `4872173 - ${uniqueSuffix}`;
+    // Keep existing NDI or generate a new one if it's a new profile
+    const ndi = existingProfile?.ndi || `4872173 - ${Math.floor(1000000 + Math.random() * 9000000)}`;
 
     const docId = user.uid;
     const finalData = { 
@@ -79,7 +104,7 @@ export function ProfileForm() {
       id: docId,
       ndi,
       profileImageUrl: imagePreview || `https://picsum.photos/seed/${data.identificationName}/200/200`,
-      createdAt: serverTimestamp(),
+      createdAt: existingProfile?.createdAt || serverTimestamp(),
       updatedAt: serverTimestamp()
     }
 
@@ -89,11 +114,9 @@ export function ProfileForm() {
       setDocumentNonBlocking(docRef, finalData, { merge: true });
       
       toast({
-        title: "Manifestação Registrada",
-        description: `Seu NDI é: ${ndi}. Perfil catalogado com sucesso.`,
+        title: existingProfile ? "Manifestação Atualizada" : "Manifestação Registrada",
+        description: `Protocolo ${ndi} sincronizado com sucesso.`,
       })
-      form.reset()
-      setImagePreview(null)
     } catch (error) {
       toast({
         variant: "destructive",
@@ -126,7 +149,7 @@ export function ProfileForm() {
           <div className="space-y-2">
             <h3 className="text-2xl font-headline font-bold text-primary">Acesso Restrito</h3>
             <p className="text-muted-foreground max-w-[280px]">
-              Para registrar sua identidade no multiverso, você deve primeiro entrar na rede usando seu e-mail.
+              Para registrar ou editar sua identidade no multiverso, você deve primeiro entrar na rede.
             </p>
           </div>
           <Button variant="outline" className="rounded-full px-8" asChild>
@@ -137,18 +160,28 @@ export function ProfileForm() {
     )
   }
 
+  if (isProfileLoading) {
+    return (
+      <Card className="w-full shadow-2xl border-border/50 bg-white/80 backdrop-blur-xl py-24 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary opacity-50" />
+      </Card>
+    );
+  }
+
   return (
     <Card className="w-full shadow-2xl border-border/50 bg-white/80 backdrop-blur-xl">
       <CardHeader className="text-center space-y-4">
         <div className="flex justify-center">
           <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10">
-            <ShieldCheck className="h-10 w-10 text-primary" />
+            {existingProfile ? <UserCheck className="h-10 w-10 text-primary" /> : <ShieldCheck className="h-10 w-10 text-primary" />}
           </div>
         </div>
         <div className="space-y-1">
-          <CardTitle className="text-3xl font-headline font-bold text-primary">Inscrição de Criador</CardTitle>
+          <CardTitle className="text-3xl font-headline font-bold text-primary">
+            {existingProfile ? "Editar Manifestação" : "Inscrição de Criador"}
+          </CardTitle>
           <CardDescription className="text-sm font-medium">
-            Registrado como: {user.email}
+            {existingProfile ? `Identidade detectada: ${existingProfile.ndi}` : `Registrado como: ${user.email}`}
           </CardDescription>
         </div>
       </CardHeader>
@@ -179,7 +212,7 @@ export function ProfileForm() {
                   <FormItem>
                     <FormLabel className="text-xs uppercase font-black tracking-widest opacity-70">Nome Completo</FormLabel>
                     <FormControl>
-                      <Input placeholder="Seu nome" {...field} className="bg-white/50" />
+                      <Input placeholder="Seu nome" {...field} className="bg-white/50 rounded-xl" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -192,7 +225,7 @@ export function ProfileForm() {
                   <FormItem>
                     <FormLabel className="text-xs uppercase font-black tracking-widest opacity-70">Identificação ID</FormLabel>
                     <FormControl>
-                      <Input placeholder="ex: explorador_01" {...field} className="bg-white/50" />
+                      <Input placeholder="ex: explorador_01" {...field} className="bg-white/50 rounded-xl" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -210,7 +243,7 @@ export function ProfileForm() {
                       <Calendar className="h-3 w-3" /> Idade
                     </FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="Anos" {...field} className="bg-white/50" />
+                      <Input type="number" placeholder="Anos" {...field} className="bg-white/50 rounded-xl" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -225,7 +258,7 @@ export function ProfileForm() {
                       <Ruler className="h-3 w-3" /> Altura
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="ex: 1.85m" {...field} className="bg-white/50" />
+                      <Input placeholder="ex: 1.85m" {...field} className="bg-white/50 rounded-xl" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -240,7 +273,7 @@ export function ProfileForm() {
                 <FormItem>
                   <FormLabel className="text-xs uppercase font-black tracking-widest opacity-70">Universo a Criar</FormLabel>
                   <FormControl>
-                    <Input placeholder="Nome do seu novo mundo" {...field} className="bg-white/50" />
+                    <Input placeholder="Nome do seu novo mundo" {...field} className="bg-white/50 rounded-xl" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -254,7 +287,7 @@ export function ProfileForm() {
                 <FormItem>
                   <FormLabel className="text-xs uppercase font-black tracking-widest opacity-70">Propósito</FormLabel>
                   <FormControl>
-                    <Input placeholder="Qual sua missão?" {...field} className="bg-white/50" />
+                    <Input placeholder="Qual sua missão?" {...field} className="bg-white/50 rounded-xl" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -272,7 +305,7 @@ export function ProfileForm() {
                   <FormControl>
                     <Textarea 
                       placeholder="Conte sobre sua trajetória..." 
-                      className="min-h-[100px] bg-white/50 resize-none"
+                      className="min-h-[100px] bg-white/50 resize-none rounded-xl"
                       {...field} 
                     />
                   </FormControl>
@@ -288,11 +321,12 @@ export function ProfileForm() {
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Processando...
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Sincronizando...
                 </>
               ) : (
                 <>
-                  <Send className="mr-2 h-5 w-5" /> Iniciar Manifestação
+                  {existingProfile ? <Sparkles className="mr-2 h-5 w-5" /> : <Send className="mr-2 h-5 w-5" />}
+                  {existingProfile ? "Atualizar Manifestação" : "Iniciar Manifestação"}
                 </>
               )}
             </Button>
