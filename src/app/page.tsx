@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useEffect, useState } from "react";
@@ -23,6 +24,7 @@ export default function Home() {
     setCurrentYear(new Date().getFullYear());
   }, []);
 
+  // Garante que todo visitante seja autenticado anonimamente de forma silenciosa
   useEffect(() => {
     if (!isUserLoading && !user && auth) {
       initiateAnonymousSignIn(auth);
@@ -74,7 +76,7 @@ export default function Home() {
           <div className="container mx-auto px-4 z-10 text-center space-y-8">
             <div className="inline-flex items-center gap-2 px-6 py-2 bg-primary/5 backdrop-blur-sm border border-primary/10 rounded-full text-primary animate-fade-in">
               <ShieldCheck className="h-4 w-4" />
-              <span className="text-xs font-bold uppercase tracking-[0.2em]">Acesso Autenticado</span>
+              <span className="text-xs font-bold uppercase tracking-[0.2em]">Sincronização Ativa</span>
             </div>
             
             <h1 className="text-6xl md:text-9xl font-headline font-bold leading-none tracking-tighter text-primary">
@@ -83,12 +85,12 @@ export default function Home() {
             
             <p className="max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground font-light leading-relaxed">
               "Existem infinitos mundos, infinitas versões de você. <br /> 
-              Manifeste a realidade que você deseja criar."
+              Acesso liberado para todos os arquitetos da realidade."
             </p>
             
             <div className="flex flex-col sm:flex-row gap-6 justify-center pt-8">
               <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-full px-10 h-16 shadow-2xl transition-all hover:scale-105" asChild>
-                <a href="#join">Manifestar Universo</a>
+                <a href="#join">Manifestar agora</a>
               </Button>
               <Button size="lg" variant="outline" className="border-primary/20 text-primary hover:bg-primary/5 font-bold rounded-full px-10 h-16 transition-all" asChild>
                 <a href="https://discord.gg/9znvQram" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
@@ -109,18 +111,18 @@ export default function Home() {
             <div className="grid lg:grid-cols-2 gap-24 items-center">
               <div className="space-y-8">
                 <div className="space-y-4">
-                  <h2 className="text-5xl font-headline font-bold text-primary tracking-tight">Arquitete seu Destino</h2>
+                  <h2 className="text-5xl font-headline font-bold text-primary tracking-tight">Crie seu Perfil</h2>
                   <div className="h-1.5 w-24 bg-accent/20 rounded-full" />
                 </div>
                 <p className="text-xl text-muted-foreground leading-relaxed">
-                  Ao ingressar no Projeto Multiverso, você não é apenas um observador. Você é o arquiteto fundamental de uma nova linha temporal.
+                  Não é necessário criar uma conta. Basta preencher sua ficha de manifestação e sua assinatura será registrada na rede do multiverso.
                 </p>
                 <div className="grid sm:grid-cols-2 gap-6">
                   {[
-                    "Manifestação Dimensional",
-                    "Propósitos Autênticos",
-                    "Conexão de Criadores",
-                    "Segurança de Dados Real"
+                    "Manifestação Instantânea",
+                    "Sem Necessidade de Login",
+                    "Identidade Dimensional Única",
+                    "Sincronização em Tempo Real"
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-4 p-4 rounded-xl border border-border bg-secondary/20">
                       <div className="bg-primary/10 p-2 rounded-lg text-primary">
@@ -146,11 +148,11 @@ export default function Home() {
           <div className="container mx-auto px-4">
             <div className="text-center mb-20 space-y-4">
               <div className="inline-flex items-center gap-2 text-accent font-bold uppercase tracking-widest text-xs py-1 px-3 border border-accent/20 rounded-full">
-                <Users className="h-3 w-3" /> Catalogação de Criadores
+                <Users className="h-3 w-3" /> Rede de Criadores
               </div>
               <h2 className="text-5xl font-headline font-bold text-primary">Exploradores Ativos</h2>
               <p className="text-muted-foreground max-w-xl mx-auto text-lg">
-                Visualizando apenas perfis verificados e arquiteturas universais genuínas.
+                Conectando todos os arquitetos presentes nesta linha temporal.
               </p>
             </div>
 
@@ -210,7 +212,7 @@ export default function Home() {
             
             <div className="flex flex-col items-center md:items-end gap-4 text-center md:text-right">
               <p className="text-sm font-medium text-muted-foreground">
-                © {currentYear || "..."} Projeto Multiverso. Todos os dados são protegidos por criptografia dimensional.
+                © {currentYear || "..."} Projeto Multiverso. Aberto para todos os criadores.
               </p>
               <div className="flex gap-4">
                 <span className="text-[10px] font-mono bg-secondary px-3 py-1 rounded-full text-muted-foreground uppercase tracking-widest">Protocolo: V-2.0</span>

@@ -65,8 +65,8 @@ export function ProfileForm() {
     
     setIsSubmitting(true)
 
-    let currentUser = user;
-    if (!currentUser) {
+    // Se o usuário ainda não estiver autenticado (mesmo anonimamente), tenta autenticar agora
+    if (!user) {
       initiateAnonymousSignIn(auth);
       toast({
         title: "Sincronizando...",
@@ -76,12 +76,11 @@ export function ProfileForm() {
       return;
     }
 
-    // Gerar um número aleatório de 7 dígitos para garantir unicidade visual
-    // O prefixo fixo é 4872173. O "x" será um número de 7 dígitos.
+    // Gerar um número aleatório de 7 dígitos para o NDI
     const uniqueSuffix = Math.floor(1000000 + Math.random() * 9000000);
     const ndi = `4872173 - ${uniqueSuffix}`;
 
-    const docId = currentUser.uid;
+    const docId = user.uid; // Usa o UID anônimo como ID do documento
     const finalData = { 
       ...data, 
       id: docId,
@@ -135,7 +134,7 @@ export function ProfileForm() {
         <div className="space-y-1">
           <CardTitle className="text-3xl font-headline font-bold text-primary">Inscrição de Criador</CardTitle>
           <CardDescription className="text-sm font-medium">
-            Preencha sua ficha de manifestação dimensional completa.
+            Preencha sua ficha. Não é necessário conta externa.
           </CardDescription>
         </div>
       </CardHeader>
@@ -166,7 +165,7 @@ export function ProfileForm() {
                   <FormItem>
                     <FormLabel className="text-xs uppercase font-black tracking-widest opacity-70">Nome Completo</FormLabel>
                     <FormControl>
-                      <Input placeholder="Nome real" {...field} className="bg-white/50" />
+                      <Input placeholder="Seu nome" {...field} className="bg-white/50" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -197,7 +196,7 @@ export function ProfileForm() {
                       <Calendar className="h-3 w-3" /> Idade
                     </FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="Anos terrestres" {...field} className="bg-white/50" />
+                      <Input type="number" placeholder="Anos" {...field} className="bg-white/50" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -227,7 +226,7 @@ export function ProfileForm() {
                 <FormItem>
                   <FormLabel className="text-xs uppercase font-black tracking-widest opacity-70">Universo a Criar</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ex: Terra 2.0, Dimensão Prisma" {...field} className="bg-white/50" />
+                    <Input placeholder="Nome do seu novo mundo" {...field} className="bg-white/50" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -239,9 +238,9 @@ export function ProfileForm() {
               name="purpose"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs uppercase font-black tracking-widest opacity-70">Propósito da Criação</FormLabel>
+                  <FormLabel className="text-xs uppercase font-black tracking-widest opacity-70">Propósito</FormLabel>
                   <FormControl>
-                    <Input placeholder="Qual sua missão principal?" {...field} className="bg-white/50" />
+                    <Input placeholder="Qual sua missão?" {...field} className="bg-white/50" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -254,11 +253,11 @@ export function ProfileForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-xs uppercase font-black tracking-widest opacity-70 flex items-center gap-2">
-                    <History className="h-3 w-3" /> História Pessoal
+                    <History className="h-3 w-3" /> História
                   </FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="Conte sobre sua trajetória através das dimensões..." 
+                      placeholder="Conte sobre sua trajetória..." 
                       className="min-h-[100px] bg-white/50 resize-none"
                       {...field} 
                     />
