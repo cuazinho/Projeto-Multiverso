@@ -27,7 +27,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
 import { useAuth } from "@/firebase"
 import { initiateEmailSignIn, initiateEmailSignUp, initiateDiscordSignIn } from "@/firebase/non-blocking-login"
-import { LogIn, UserPlus, Loader2, Mail, Lock } from "lucide-react"
+import { LogIn, Loader2, Mail, Lock } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 
 const authSchema = z.object({
@@ -50,21 +50,33 @@ export function AuthModal() {
     },
   })
 
+  const handleAuthError = (error: any, action: string) => {
+    if (error.code === 'auth/operation-not-allowed') {
+      toast({
+        variant: "destructive",
+        title: "Configuração Pendente",
+        description: "Este método de login não está ativado no Console do Firebase. Por favor, ative o provedor de E-mail ou Discord nas configurações de Authentication.",
+      })
+    } else {
+      toast({
+        variant: "destructive",
+        title: `Erro no ${action}`,
+        description: "Verifique suas credenciais ou tente novamente mais tarde.",
+      })
+    }
+  }
+
   const onSignIn = async (data: AuthFormValues) => {
     setIsLoading(true)
     try {
-      initiateEmailSignIn(auth, data.email, data.password)
+      await initiateEmailSignIn(auth, data.email, data.password)
       toast({
         title: "Conectando...",
-        description: "Validando suas credenciais dimensionais.",
+        description: "Sua identidade está sendo validada.",
       })
       setIsOpen(false)
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Erro de Acesso",
-        description: "Verifique seu e-mail e senha.",
-      })
+    } catch (error: any) {
+      handleAuthError(error, "Login")
     } finally {
       setIsLoading(false)
     }
@@ -73,34 +85,26 @@ export function AuthModal() {
   const onSignUp = async (data: AuthFormValues) => {
     setIsLoading(true)
     try {
-      initiateEmailSignUp(auth, data.email, data.password)
+      await initiateEmailSignUp(auth, data.email, data.password)
       toast({
         title: "Conta Criada",
         description: "Seja bem-vindo ao Projeto Multiverso!",
       })
       setIsOpen(false)
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Erro no Cadastro",
-        description: "Não foi possível criar sua conta agora.",
-      })
+    } catch (error: any) {
+      handleAuthError(error, "Cadastro")
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleDiscordSignIn = () => {
+  const handleDiscordSignIn = async () => {
     setIsLoading(true)
     try {
-      initiateDiscordSignIn(auth)
+      await initiateDiscordSignIn(auth)
       setIsOpen(false)
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Erro Discord",
-        description: "Falha na conexão com o servidor do Discord.",
-      })
+    } catch (error: any) {
+      handleAuthError(error, "Login com Discord")
     } finally {
       setIsLoading(false)
     }
