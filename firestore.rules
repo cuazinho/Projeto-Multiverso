@@ -5,7 +5,8 @@ service cloud.firestore {
     /**
      * MULTIVERSE EXPLORER SECURITY RULES
      * 
-     * Nota: A permissão de delete foi temporariamente expandida para permitir a limpeza do protótipo.
+     * Nota: A permissão de leitura (get/list) é pública para que a galeria de 
+     * exploradores seja visível por qualquer visitante da linha temporal.
      */
 
     function isSignedIn() {
@@ -22,13 +23,15 @@ service cloud.firestore {
 
     match /explorer_profiles/{explorerProfileId} {
       
-      allow get, list: if isSignedIn();
+      // Permitimos que qualquer pessoa veja os exploradores catalogados
+      allow get, list: if true;
 
+      // Apenas o dono autenticado pode criar ou atualizar seu próprio registro
       allow create: if isOwner(explorerProfileId) && request.resource.data.id == explorerProfileId;
 
       allow update: if isExistingOwner(explorerProfileId) && request.resource.data.id == resource.data.id;
 
-      // Permitimos que qualquer explorador autenticado delete para fins de reset do protótipo
+      // Permitimos que usuários autenticados deletem para fins de reset do protótipo
       allow delete: if isSignedIn();
     }
   }
