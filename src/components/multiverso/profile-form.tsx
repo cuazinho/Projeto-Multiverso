@@ -19,12 +19,11 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Camera, Send, Loader2, ShieldCheck, History, Ruler, Calendar } from "lucide-react"
+import { Camera, Send, Loader2, ShieldCheck, History, Ruler, Calendar, Lock } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
-import { useFirestore, useUser, useAuth } from "@/firebase"
+import { useFirestore, useUser } from "@/firebase"
 import { doc, serverTimestamp } from "firebase/firestore"
 import { setDocumentNonBlocking } from "@/firebase/non-blocking-updates"
-import { initiateAnonymousSignIn } from "@/firebase/non-blocking-login"
 
 const profileSchema = z.object({
   name: z.string().min(2, "Nome é obrigatório"),
@@ -43,7 +42,6 @@ export function ProfileForm() {
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { firestore } = useFirestore() ? { firestore: useFirestore() } : { firestore: null };
-  const { auth } = useAuth() ? { auth: useAuth() } : { auth: null };
   const { user } = useUser();
 
   const form = useForm<ProfileFormValues>({
@@ -61,26 +59,21 @@ export function ProfileForm() {
   })
 
   const onSubmit = async (data: ProfileFormValues) => {
-    if (!firestore || !auth) return;
+    if (!firestore || !user) {
+      toast({
+        variant: "destructive",
+        title: "Acesso Negado",
+        description: "Você precisa estar logado com seu e-mail para manifestar um perfil.",
+      })
+      return;
+    }
     
     setIsSubmitting(true)
 
-    // Se o usuário ainda não estiver autenticado (mesmo anonimamente), tenta autenticar agora
-    if (!user) {
-      initiateAnonymousSignIn(auth);
-      toast({
-        title: "Sincronizando...",
-        description: "Estabelecendo conexão segura com o multiverso.",
-      })
-      setIsSubmitting(false)
-      return;
-    }
-
-    // Gerar um número aleatório de 7 dígitos para o NDI
     const uniqueSuffix = Math.floor(1000000 + Math.random() * 9000000);
     const ndi = `4872173 - ${uniqueSuffix}`;
 
-    const docId = user.uid; // Usa o UID anônimo como ID do documento
+    const docId = user.uid;
     const finalData = { 
       ...data, 
       id: docId,
@@ -123,6 +116,27 @@ export function ProfileForm() {
     }
   }
 
+  if (!user) {
+    return (
+      <Card className="w-full shadow-2xl border-border/50 bg-white/80 backdrop-blur-xl py-12">
+        <CardContent className="flex flex-col items-center text-center space-y-6">
+          <div className="p-6 bg-secondary rounded-full">
+            <Lock className="h-12 w-12 text-primary opacity-20" />
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-2xl font-headline font-bold text-primary">Acesso Restrito</h3>
+            <p className="text-muted-foreground max-w-[280px]">
+              Para registrar sua identidade no multiverso, você deve primeiro entrar na rede usando seu e-mail.
+            </p>
+          </div>
+          <Button variant="outline" className="rounded-full px-8" asChild>
+            <a href="#navbar">Subir para Login</a>
+          </Button>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <Card className="w-full shadow-2xl border-border/50 bg-white/80 backdrop-blur-xl">
       <CardHeader className="text-center space-y-4">
@@ -134,7 +148,7 @@ export function ProfileForm() {
         <div className="space-y-1">
           <CardTitle className="text-3xl font-headline font-bold text-primary">Inscrição de Criador</CardTitle>
           <CardDescription className="text-sm font-medium">
-            Preencha sua ficha. Não é necessário conta externa.
+            Registrado como: {user.email}
           </CardDescription>
         </div>
       </CardHeader>

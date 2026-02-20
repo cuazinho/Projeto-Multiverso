@@ -1,14 +1,42 @@
-import { Users, UserPlus } from 'lucide-react';
+
+"use client"
+
+import { Users, UserPlus, LogOut, User } from 'lucide-react';
 import Link from 'next/link';
 import { Logo } from './logo';
+import { AuthModal } from './auth-modal';
+import { useUser, useAuth } from '@/firebase';
+import { Button } from '@/components/ui/button';
+import { signOut } from 'firebase/auth';
+import { toast } from '@/hooks/use-toast';
 
 export function Navbar() {
+  const { user } = useUser();
+  const auth = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      toast({
+        title: "Desconectado",
+        description: "Sua sessão dimensional foi encerrada.",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro ao sair",
+        description: "Houve um problema ao encerrar sua sessão.",
+      });
+    }
+  };
+
   return (
     <nav className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="hover:opacity-80 transition-opacity">
           <Logo className="text-primary" />
         </Link>
+        
         <div className="flex items-center gap-4 sm:gap-6">
           <Link href="#explorers" className="flex items-center gap-2 text-sm font-medium hover:text-accent transition-colors text-muted-foreground">
             <Users className="h-4 w-4" />
@@ -35,10 +63,25 @@ export function Navbar() {
             <span className="hidden md:inline">Discord</span>
           </a>
 
-          <Link href="#join" className="flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded-full text-sm font-bold hover:bg-accent hover:text-accent-foreground transition-all shadow-md">
-            <UserPlus className="h-4 w-4" />
-            <span>Participar</span>
-          </Link>
+          {user ? (
+            <div className="flex items-center gap-4">
+              <div className="hidden lg:flex flex-col items-end">
+                <span className="text-[10px] font-black uppercase tracking-tighter opacity-40">Explorador</span>
+                <span className="text-xs font-bold text-primary truncate max-w-[120px]">{user.email}</span>
+              </div>
+              <Button variant="ghost" size="icon" onClick={handleLogout} className="text-muted-foreground hover:text-destructive">
+                <LogOut className="h-5 w-5" />
+              </Button>
+              <Link href="#join" className="hidden sm:flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded-full text-sm font-bold hover:bg-accent hover:text-accent-foreground transition-all shadow-md">
+                <UserPlus className="h-4 w-4" />
+                <span>Perfil</span>
+              </Link>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <AuthModal />
+            </div>
+          )}
         </div>
       </div>
     </nav>

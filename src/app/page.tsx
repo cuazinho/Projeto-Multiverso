@@ -9,27 +9,19 @@ import { ExplorerCard } from "@/components/multiverso/explorer-card";
 import { Logo } from "@/components/multiverso/logo";
 import { PalmeChat } from "@/components/multiverso/palme-chat";
 import { Button } from "@/components/ui/button";
-import { Users, ArrowDown, Sparkles, Globe, ShieldCheck, MessageCircle, Trash2 } from "lucide-react";
-import { useCollection, useMemoFirebase, useFirestore, useAuth, useUser, deleteDocumentNonBlocking } from "@/firebase";
+import { Users, ArrowDown, Sparkles, Globe, ShieldCheck, MessageCircle, Trash2, LogIn } from "lucide-react";
+import { useCollection, useMemoFirebase, useFirestore, useUser, deleteDocumentNonBlocking } from "@/firebase";
 import { collection, query, orderBy, doc } from "firebase/firestore";
-import { initiateAnonymousSignIn } from "@/firebase/non-blocking-login";
 import { toast } from "@/hooks/use-toast";
 
 export default function Home() {
-  const { firestore, auth } = useFirestore() ? { firestore: useFirestore(), auth: useAuth() } : { firestore: null, auth: null };
-  const { user, isUserLoading } = useUser();
+  const { firestore } = useFirestore() ? { firestore: useFirestore() } : { firestore: null };
+  const { user } = useUser();
   const [currentYear, setCurrentYear] = useState<number | null>(null);
 
   useEffect(() => {
     setCurrentYear(new Date().getFullYear());
   }, []);
-
-  // Garante que todo visitante seja autenticado anonimamente de forma silenciosa
-  useEffect(() => {
-    if (!isUserLoading && !user && auth) {
-      initiateAnonymousSignIn(auth);
-    }
-  }, [user, isUserLoading, auth]);
 
   const explorersQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -90,7 +82,7 @@ export default function Home() {
             
             <div className="flex flex-col sm:flex-row gap-6 justify-center pt-8">
               <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-full px-10 h-16 shadow-2xl transition-all hover:scale-105" asChild>
-                <a href="#join">Manifestar agora</a>
+                <a href="#join">{user ? "Manifestar agora" : "Começar Jornada"}</a>
               </Button>
               <Button size="lg" variant="outline" className="border-primary/20 text-primary hover:bg-primary/5 font-bold rounded-full px-10 h-16 transition-all" asChild>
                 <a href="https://discord.gg/9znvQram" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
@@ -115,12 +107,12 @@ export default function Home() {
                   <div className="h-1.5 w-24 bg-accent/20 rounded-full" />
                 </div>
                 <p className="text-xl text-muted-foreground leading-relaxed">
-                  Não é necessário criar uma conta. Basta preencher sua ficha de manifestação e sua assinatura será registrada na rede do multiverso.
+                  Conecte-se com seu e-mail para registrar sua identidade oficial e manifestar seu próprio universo na rede.
                 </p>
                 <div className="grid sm:grid-cols-2 gap-6">
                   {[
+                    "Contas Oficiais por E-mail",
                     "Manifestação Instantânea",
-                    "Sem Necessidade de Login",
                     "Identidade Dimensional Única",
                     "Sincronização em Tempo Real"
                   ].map((item, i) => (
@@ -180,7 +172,7 @@ export default function Home() {
               </div>
             )}
             
-            {!isListLoading && explorers && explorers.length > 0 && (
+            {user && !isListLoading && explorers && explorers.length > 0 && (
               <div className="mt-20 flex justify-center">
                 <Button 
                   variant="ghost" 
@@ -223,7 +215,6 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* Agente Virtual Palme */}
       <PalmeChat />
     </div>
   );
