@@ -77,7 +77,7 @@
     "providers": [
       "password",
       "anonymous",
-      "discord"
+      "google"
     ]
   },
   "firestore": {

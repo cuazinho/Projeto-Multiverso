@@ -6,7 +6,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signInWithPopup,
-  OAuthProvider,
+  GoogleAuthProvider,
   UserCredential
 } from 'firebase/auth';
 
@@ -25,9 +25,8 @@ export function initiateEmailSignIn(authInstance: Auth, email: string, password:
   return signInWithEmailAndPassword(authInstance, email, password);
 }
 
-/** Initiate Discord sign-in via OAuth. Returns a Promise. */
-export function initiateDiscordSignIn(authInstance: Auth): Promise<UserCredential> {
-  const provider = new OAuthProvider('discord.com');
-  // Note: Discord provider must be configured in Firebase Console first.
+/** Initiate Google sign-in via Popup. Returns a Promise. */
+export function initiateGoogleSignIn(authInstance: Auth): Promise<UserCredential> {
+  const provider = new GoogleAuthProvider();
   return signInWithPopup(authInstance, provider);
 }
