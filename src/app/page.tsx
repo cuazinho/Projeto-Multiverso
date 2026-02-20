@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useEffect, useState } from "react";
@@ -8,7 +9,7 @@ import { ExplorerCard } from "@/components/multiverso/explorer-card";
 import { Logo } from "@/components/multiverso/logo";
 import { PalmeChat } from "@/components/multiverso/palme-chat";
 import { Button } from "@/components/ui/button";
-import { Users, ArrowDown, Sparkles, Globe, ShieldCheck, MessageCircle, Trash2 } from "lucide-react";
+import { Users, ArrowDown, Sparkles, Globe, ShieldCheck, MessageCircle, Trash2, LayoutDashboard, Terminal } from "lucide-react";
 import { useCollection, useMemoFirebase, useFirestore, useUser, deleteDocumentNonBlocking } from "@/firebase";
 import { collection, query, orderBy, doc } from "firebase/firestore";
 import { toast } from "@/hooks/use-toast";
@@ -16,9 +17,11 @@ import { toast } from "@/hooks/use-toast";
 export default function Home() {
   const firestore = useFirestore();
   const { user } = useUser();
+  const [mounted, setMounted] = useState(false);
   const [currentYear, setCurrentYear] = useState<number | null>(null);
 
   useEffect(() => {
+    setMounted(true);
     setCurrentYear(new Date().getFullYear());
   }, []);
 
@@ -47,6 +50,8 @@ export default function Home() {
     });
   };
 
+  if (!mounted) return null;
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
@@ -71,7 +76,7 @@ export default function Home() {
             </div>
             
             <h1 className="text-6xl md:text-9xl font-headline font-bold leading-none tracking-tighter text-primary">
-              PROJETO <br /> <span className="text-accent opacity-60">MULTIVERSO</span>
+              PROJETO <br /> <span className="text-slate-400">MULTIVERSO</span>
             </h1>
             
             <p className="max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground font-light leading-relaxed">
@@ -81,7 +86,7 @@ export default function Home() {
             
             <div className="flex flex-col sm:flex-row gap-6 justify-center pt-8">
               <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-full px-10 h-16 shadow-2xl transition-all hover:scale-105" asChild>
-                <a href="#join">{user ? "Manifestar agora" : "Começar Jornada"}</a>
+                <a href="#join">{user ? "Acessar Terminal" : "Começar Jornada"}</a>
               </Button>
               <Button size="lg" variant="outline" className="border-primary/20 text-primary hover:bg-primary/5 font-bold rounded-full px-10 h-16 transition-all" asChild>
                 <a href="https://discord.gg/9znvQram" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
@@ -96,36 +101,46 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Join Section */}
+        {/* Join/Dashboard Section */}
         <section id="join" className="py-32 bg-white">
           <div className="container mx-auto px-4">
-            <div className="grid lg:grid-cols-2 gap-24 items-center">
-              <div className="space-y-8">
+            <div className="grid lg:grid-cols-2 gap-24 items-start">
+              <div className="space-y-8 sticky top-32">
                 <div className="space-y-4">
-                  <h2 className="text-5xl font-headline font-bold text-primary tracking-tight">Crie seu Perfil</h2>
-                  <div className="h-1.5 w-24 bg-accent/20 rounded-full" />
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 rounded-lg text-slate-600 text-[10px] font-black uppercase tracking-widest">
+                    {user ? <LayoutDashboard className="h-3 w-3" /> : <Sparkles className="h-3 w-3" />}
+                    {user ? "Dashboard Pessoal" : "Nova Inscrição"}
+                  </div>
+                  <h2 className="text-5xl font-headline font-bold text-primary tracking-tight">
+                    {user ? "Terminal do Explorador" : "Crie seu Perfil"}
+                  </h2>
+                  <div className="h-1.5 w-24 bg-slate-200 rounded-full" />
                 </div>
+                
                 <p className="text-xl text-muted-foreground leading-relaxed">
-                  Conecte-se com seu e-mail para registrar sua identidade oficial e manifestar seu próprio universo na rede.
+                  {user 
+                    ? "Gerencie sua manifestação dimensional única. Cada arquiteto possui o controle total sobre um único universo nesta linha temporal."
+                    : "Conecte-se com seu e-mail ou Discord para registrar sua identidade oficial e manifestar seu próprio universo na rede."}
                 </p>
-                <div className="grid sm:grid-cols-2 gap-6">
+
+                <div className="grid sm:grid-cols-2 gap-4">
                   {[
-                    "Contas Oficiais por E-mail",
-                    "Manifestação Instantânea",
-                    "Identidade Dimensional Única",
-                    "Sincronização em Tempo Real"
+                    { text: "Login via Discord", icon: <MessageCircle className="h-4 w-4" /> },
+                    { text: "Universo Único", icon: <Globe className="h-4 w-4" /> },
+                    { text: "Identidade NDI", icon: <Terminal className="h-4 w-4" /> },
+                    { text: "Painel de Edição", icon: <LayoutDashboard className="h-4 w-4" /> }
                   ].map((item, i) => (
-                    <div key={i} className="flex items-center gap-4 p-4 rounded-xl border border-border bg-secondary/20">
-                      <div className="bg-primary/10 p-2 rounded-lg text-primary">
-                        <Sparkles className="h-5 w-5" />
+                    <div key={i} className="flex items-center gap-3 p-4 rounded-xl border border-border bg-slate-50/50">
+                      <div className="text-primary opacity-60">
+                        {item.icon}
                       </div>
-                      <span className="font-semibold text-sm">{item}</span>
+                      <span className="font-bold text-xs uppercase tracking-tight text-slate-600">{item.text}</span>
                     </div>
                   ))}
                 </div>
               </div>
               <div className="relative">
-                <div className="absolute -inset-4 bg-primary/5 blur-3xl rounded-full" />
+                <div className="absolute -inset-4 bg-slate-100/50 blur-3xl rounded-full" />
                 <div className="relative">
                   <ProfileForm />
                 </div>
@@ -135,10 +150,10 @@ export default function Home() {
         </section>
 
         {/* Explorers List Section */}
-        <section id="explorers" className="py-32 bg-secondary/30">
+        <section id="explorers" className="py-32 bg-slate-50">
           <div className="container mx-auto px-4">
             <div className="text-center mb-20 space-y-4">
-              <div className="inline-flex items-center gap-2 text-accent font-bold uppercase tracking-widest text-xs py-1 px-3 border border-accent/20 rounded-full">
+              <div className="inline-flex items-center gap-2 text-slate-500 font-bold uppercase tracking-widest text-xs py-1 px-3 border border-slate-200 rounded-full">
                 <Users className="h-3 w-3" /> Rede de Criadores
               </div>
               <h2 className="text-5xl font-headline font-bold text-primary">Exploradores Ativos</h2>
@@ -150,7 +165,7 @@ export default function Home() {
             {isListLoading ? (
               <div className="flex flex-col items-center justify-center py-20 gap-6">
                 <div className="relative">
-                  <div className="h-16 w-16 border-4 border-primary/10 border-t-primary rounded-full animate-spin" />
+                  <div className="h-16 w-16 border-4 border-slate-200 border-t-primary rounded-full animate-spin" />
                   <Globe className="h-6 w-6 text-primary absolute inset-0 m-auto animate-pulse" />
                 </div>
                 <p className="text-muted-foreground font-medium animate-pulse">Sintonizando frequências reais...</p>
@@ -164,8 +179,8 @@ export default function Home() {
             )}
 
             {!isListLoading && (!explorers || explorers.length === 0) && (
-              <div className="text-center py-24 bg-white/50 backdrop-blur-md rounded-3xl border-2 border-dashed border-primary/10">
-                <Globe className="h-16 w-16 text-primary/20 mx-auto mb-6" />
+              <div className="text-center py-24 bg-white/50 backdrop-blur-md rounded-3xl border-2 border-dashed border-slate-200">
+                <Globe className="h-16 w-16 text-slate-200 mx-auto mb-6" />
                 <p className="text-xl text-muted-foreground font-medium">Nenhum criador catalogado nesta linha temporal.</p>
                 <p className="text-sm text-muted-foreground/60 mt-2">Seja o primeiro a manifestar seu universo.</p>
               </div>
@@ -195,7 +210,7 @@ export default function Home() {
                 <Logo className="text-primary scale-110" />
               </Link>
               <div className="flex gap-6">
-                <a href="https://discord.gg/9znvQram" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-[#5865F2] transition-colors flex items-center gap-2 text-sm font-bold uppercase tracking-widest">
+                <a href="https://discord.gg/9znvQram" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-slate-900 transition-colors flex items-center gap-2 text-sm font-bold uppercase tracking-widest">
                   <MessageCircle className="h-4 w-4" /> Discord do Projeto
                 </a>
               </div>
@@ -206,7 +221,7 @@ export default function Home() {
                 © {currentYear || "..."} Projeto Multiverso. Aberto para todos os criadores.
               </p>
               <div className="flex gap-4">
-                <span className="text-[10px] font-mono bg-secondary px-3 py-1 rounded-full text-muted-foreground uppercase tracking-widest">Protocolo: V-2.0</span>
+                <span className="text-[10px] font-mono bg-slate-100 px-3 py-1 rounded-full text-muted-foreground uppercase tracking-widest">Protocolo: V-2.0</span>
                 <span className="text-[10px] font-mono bg-green-50 px-3 py-1 rounded-full text-green-700 uppercase tracking-widest border border-green-100">Status: Sincronizado</span>
               </div>
             </div>

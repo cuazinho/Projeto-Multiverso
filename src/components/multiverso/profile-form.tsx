@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -18,7 +19,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Camera, Send, Loader2, ShieldCheck, History, Ruler, Calendar, Lock, Sparkles, UserCheck } from "lucide-react"
+import { Camera, Send, Loader2, ShieldCheck, History, Ruler, Calendar, Lock, Sparkles, UserCheck, LayoutDashboard } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 import { useFirestore, useUser, useDoc, useMemoFirebase } from "@/firebase"
 import { doc, serverTimestamp } from "firebase/firestore"
@@ -140,9 +141,9 @@ export function ProfileForm() {
 
   if (!user) {
     return (
-      <Card className="w-full shadow-2xl border-border/50 bg-white/80 backdrop-blur-xl py-12">
+      <Card className="w-full shadow-2xl border-slate-200 bg-white/80 backdrop-blur-xl py-12">
         <CardContent className="flex flex-col items-center text-center space-y-6">
-          <div className="p-6 bg-secondary rounded-full">
+          <div className="p-6 bg-slate-100 rounded-full">
             <Lock className="h-12 w-12 text-primary opacity-20" />
           </div>
           <div className="space-y-2">
@@ -161,26 +162,29 @@ export function ProfileForm() {
 
   if (isProfileLoading) {
     return (
-      <Card className="w-full shadow-2xl border-border/50 bg-white/80 backdrop-blur-xl py-24 flex items-center justify-center">
+      <Card className="w-full shadow-2xl border-slate-200 bg-white/80 backdrop-blur-xl py-24 flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary opacity-50" />
       </Card>
     );
   }
 
   return (
-    <Card className="w-full shadow-2xl border-border/50 bg-white/80 backdrop-blur-xl">
-      <CardHeader className="text-center space-y-4">
+    <Card className="w-full shadow-2xl border-slate-200 bg-white/80 backdrop-blur-xl overflow-hidden">
+      <div className="h-2 bg-primary w-full" />
+      <CardHeader className="text-center space-y-4 pt-8">
         <div className="flex justify-center">
-          <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10">
-            {existingProfile ? <UserCheck className="h-10 w-10 text-primary" /> : <ShieldCheck className="h-10 w-10 text-primary" />}
+          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+            {existingProfile ? <LayoutDashboard className="h-10 w-10 text-primary" /> : <ShieldCheck className="h-10 w-10 text-primary" />}
           </div>
         </div>
         <div className="space-y-1">
           <CardTitle className="text-3xl font-headline font-bold text-primary">
-            {existingProfile ? "Editar Manifestação" : "Inscrição de Criador"}
+            {existingProfile ? "Terminal de Edição" : "Inscrição de Criador"}
           </CardTitle>
           <CardDescription className="text-sm font-medium">
-            {existingProfile ? `Identidade detectada: ${existingProfile.ndi}` : `Registrado como: ${user.email}`}
+            {existingProfile 
+              ? `Editando Protocolo Único: ${existingProfile.ndi}` 
+              : `Registrado como: ${user.email || user.displayName}`}
           </CardDescription>
         </div>
       </CardHeader>
@@ -191,7 +195,7 @@ export function ProfileForm() {
               <div className="relative group">
                 <Avatar className="h-32 w-32 border-4 border-white shadow-2xl ring-2 ring-primary/5">
                   <AvatarImage src={imagePreview || ""} className="object-cover" />
-                  <AvatarFallback className="bg-secondary">
+                  <AvatarFallback className="bg-slate-100">
                     <Camera className="h-10 w-10 text-muted-foreground" />
                   </AvatarFallback>
                 </Avatar>
@@ -265,33 +269,35 @@ export function ProfileForm() {
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="universeName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs uppercase font-black tracking-widest opacity-70">Universo a Criar</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Nome do seu novo mundo" {...field} className="bg-white/50 rounded-xl" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="p-6 bg-slate-50/50 rounded-2xl border border-slate-100 space-y-6">
+              <FormField
+                control={form.control}
+                name="universeName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs uppercase font-black tracking-widest opacity-70">Seu Único Mundo</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Nome do seu novo mundo" {...field} className="bg-white rounded-xl shadow-sm" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="purpose"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs uppercase font-black tracking-widest opacity-70">Propósito</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Qual sua missão?" {...field} className="bg-white/50 rounded-xl" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="purpose"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs uppercase font-black tracking-widest opacity-70">Missão Primária</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Qual sua missão?" {...field} className="bg-white rounded-xl shadow-sm" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <FormField
               control={form.control}
@@ -299,12 +305,12 @@ export function ProfileForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-xs uppercase font-black tracking-widest opacity-70 flex items-center gap-2">
-                    <History className="h-3 w-3" /> História
+                    <History className="h-3 w-3" /> Registros Históricos
                   </FormLabel>
                   <FormControl>
                     <Textarea 
                       placeholder="Conte sobre sua trajetória..." 
-                      className="min-h-[100px] bg-white/50 resize-none rounded-xl"
+                      className="min-h-[120px] bg-white/50 resize-none rounded-xl"
                       {...field} 
                     />
                   </FormControl>
@@ -320,12 +326,12 @@ export function ProfileForm() {
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Sincronizando...
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Atualizando...
                 </>
               ) : (
                 <>
                   {existingProfile ? <Sparkles className="mr-2 h-5 w-5" /> : <Send className="mr-2 h-5 w-5" />}
-                  {existingProfile ? "Atualizar Manifestação" : "Iniciar Manifestação"}
+                  {existingProfile ? "Salvar Alterações" : "Iniciar Manifestação"}
                 </>
               )}
             </Button>
